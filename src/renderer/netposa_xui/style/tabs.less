@@ -1,0 +1,102 @@
+.xui-tabs.xui-tabs-style {
+	background: @color-background-side;
+	border-bottom: 1px solid @color-border;
+	box-shadow: 0px 0px 8px @color-background-shadow;
+	border-collapse: separate !important;
+
+	.xui-tab-item {
+		height: 45px;
+		line-height: 45px;
+		color: @color-title;
+		transition: all 0.12s ease;
+
+		&:hover {
+			color: @color-primary;
+		}
+
+		&.is-active {
+			color: @color-primary;
+			border-color: @color-primary;
+		}
+
+		&:not(:last-child) {
+			&:after {
+				content: "";
+				position: absolute;
+				right: -0.5px;
+				top: 50%;
+				width: 1px;
+				height: 50%;
+				transform: translateY(-50%);
+			}
+		}
+	}
+
+	&.dag-orgtype {
+		.xui-tab-item {
+			width: 50%;
+		}
+	}
+
+	&.manner-card {
+		background: transparent;
+		height: 30px;
+		line-height: 30px;
+		.xui-tab-item {
+			height: 30px;
+			line-height: 30px;
+			border-left: 1px solid transparent;
+			border-right: 1px solid transparent;
+			border-top: 1px solid transparent;
+			border-bottom: 1px solid transparent;
+			color: @color-gray;
+
+			&.is-active {
+				border-top-color: @color-primary;
+				border-left: 1px solid @color-border;
+				border-right: 1px solid @color-border;
+				background:@color-background-component;
+				color:@color-title;
+			}
+
+			&:after {
+				display: none;
+			}
+		}
+	}
+
+	&.succinct-card {
+		.xui-tab-item {
+			border: 2px solid transparent;
+			border-color: #fff;
+
+			&.is-active {
+				border-bottom-color: @color-primary;
+			}
+
+			&:after {
+				display: none;
+			}
+		}
+	}
+
+	&.manner-button {
+		padding: 0px;
+		box-shadow: none;
+		.xui-tab-item {
+			height: 35px;
+			line-height: 35px;
+			background: @color-background;
+			color: @color-subcolor;
+
+			&.is-active {
+				background: @color-primary;
+				color: #fff;
+			}
+
+			&:after {
+				display: none;
+			}
+		}
+	}
+}

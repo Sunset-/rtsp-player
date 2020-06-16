@@ -1,0 +1,93 @@
+.xui-multiselect.xui-multiselect-style {
+	width: @width-normal;
+	vertical-align: middle;
+	color: @color-content;
+	height: @height-normal;
+
+	.multiselect-trigger {
+		height: @height-normal;
+		background: @color-background-widget;
+		border: 1px solid @color-border;
+		font-size: 14px;
+		border-radius: 2px;
+		padding: 0px 25px 0px 10px;
+		line-height: @height-normal - 2px;
+		box-sizing: border-box;
+		input {
+			height: @height-normal;
+			padding: 0px 25px 0px 10px;
+			background: @color-background-widget;
+			line-height: @height-normal - 2px;
+			color: @color-title;
+			font-family: @font-family;
+			&::-webkit-input-placeholder {
+				color: @color-placeholder;
+			}
+		}
+
+		&:hover,
+		&:focus-within {
+			border-color: @color-primary;
+		}
+
+		&.open {
+			.select-trigger-icon {
+				transform: rotate(180deg);
+			}
+		}
+	}
+
+	.xui-multiselect-placeholder {
+		color: @color-placeholder;
+		height: @height-normal - 2px;
+	}
+
+	.select-trigger-icon {
+		font-size: 12px;
+		right: 10px;
+		color: @color-subcolor;
+		transform: rotate(0deg);
+		transition: all 0.2s;
+	}
+
+	&.disabled {
+		.xui-multiselect-inputwrap {
+			background: @color-disabled;
+
+			&:hover,
+			&:focus-within {
+				border-color: @color-border;
+			}
+		}
+	}
+}
+
+.xui-multiselect-box {
+	border: 1px solid @color-border;
+	.left-btns .check-all.selected:before {
+		border: 1px solid @color-primary;
+		background: @color-primary;
+	}
+	.multiselect-toolbar {
+		background: @color-background-header;
+		.check-all {
+			color: @color-title;
+		}
+	}
+
+	.right-btns .finish {
+		color: @color-primary;
+	}
+	.multiselect-options .multiselect-option {
+		background: @color-background-widget;
+		border-color: @color-border;
+		color: @color-content;
+		&:hover {
+			background: lighten(@color-background, 5%);
+		}
+	}
+	.multiselect-options .multiselect-option.selected:before {
+		border: 1px solid @color-primary;
+		background: @color-primary;
+	}
+}

@@ -1,0 +1,44 @@
+body {
+	background: @color-background;
+	font-size: 14px;
+}
+
+.MODULE-CONTAINER {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+}
+
+.BOX {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+}
+
+.CARD {
+	background: @color-background-component;
+	padding: 10px;
+	border: 1px solid @color-border;
+}
+
+.jsonview.jsonview-style {
+	color: @color-content;
+	font-size: 12px;
+	.string {
+		color: @color-success;
+		white-space: pre-wrap;
+	}
+	.bool {
+		color: @color-info;
+	}
+	.num{
+		color: @color-primary;
+	}
+	.null{
+		color: @color-danger;
+	}
+}

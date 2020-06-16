@@ -1,0 +1,20 @@
+.xui-switch.xui-switch-style {
+	width: 44px;
+	height: 20px;
+	background-color: @color-background-widget;
+	border: 1px solid @color-border;
+	&.xui-switch-anim:checked {
+		box-shadow: @color-primary 0 0 0 16px inset;
+		background-color: @color-primary;
+	}
+	&.xui-switch:checked {
+		border-color: @color-primary;
+	}
+	&:before {
+		width: 18px;
+		height: 18px;
+    }
+    &:checked:before {
+        left: 24px;
+    }
+}

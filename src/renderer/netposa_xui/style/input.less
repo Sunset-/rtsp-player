@@ -1,0 +1,72 @@
+.xui-input.xui-input-style {
+	background: @color-background-widget;
+	border: 1px solid @color-border;
+	border-radius: 2px;
+	width: @width-normal;
+	height: @height-normal;
+	transition: all 0.15s ease;
+	font-size: 14px;
+
+	&.clearable {
+		.xui-input-inner {
+			font-size: 14px;
+			padding: 0px 25px 0px 10px;
+		}
+	}
+
+	.xui-input-append {
+		border: 0;
+		.xui-btn {
+			height: 100%;
+			border-left: 1px solid @color-border;
+			border-radius: 0px 2px 2px 0px;
+			background: #FFF;
+			color: @color-content;
+		}
+	}
+
+	.xui-input-inner {
+		height: @height-normal - 2px;
+		font-size: 14px;
+		padding: 0px 10px;
+		color: @color-content;
+		background: @color-background-widget;
+		font-family: 微软雅黑;
+
+		&::-webkit-input-placeholder {
+			color: @color-placeholder;
+		}
+	}
+
+	&:hover,
+	&:focus-within {
+		border-color: @color-primary;
+	}
+
+	&:hover,
+	&:focus-within .xui-input-wrap > div:after {
+		color: @color-primary;
+	}
+
+	//查询
+	&.common-input-search,
+	&.xui-input-manner-search {
+		// width: 220px;
+
+		.xui-input-wrap > div:after {
+			content: "\E77A";
+			font-family: "xuiiconfont" !important;
+			position: absolute;
+			color: @color-subcolor;
+			font-size: 16px;
+			right: 7px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+		.input-clear-icon {
+			z-index: 1;
+			background: #fff;
+		}
+	}
+}

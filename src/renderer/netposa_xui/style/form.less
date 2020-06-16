@@ -1,0 +1,39 @@
+.xui-form.xui-form-style {
+	.xui-form-field {
+		margin-top: 8px;
+		.xui-field-widget-component.invalid.dirty {
+			position: relative;
+			border-color: @color-danger;
+			&:after {
+				content: attr(validate-msg);
+				position: absolute;
+				left: 0px;
+				color: @color-danger;
+				font-size: 12px;
+				white-space: nowrap;
+				top: 100%;
+				transform: translate(0px, -4px);
+				line-height: 26px;
+			}
+			.xui-select-inputwrap {
+				border-color: @color-danger;
+			}
+		}
+		.xui-field-label {
+			font-size: 12px;
+			padding-right: 5px;
+			min-width: 80px;
+			color: @color-content;
+			& > span {
+				vertical-align: top;
+			}
+			&:before {
+				margin-left: -13px;
+				margin-top: 3px;
+			}
+			&:after {
+				content: "：";
+			}
+		}
+	}
+}

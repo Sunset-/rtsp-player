@@ -1,0 +1,74 @@
+.xui-select.xui-select-style {
+	width: @width-normal;
+	vertical-align: middle;
+	color: @color-content;
+	.xui-select-inputwrap {
+		height: @height-normal;
+		background: @color-background-widget;
+		border: 1px solid @color-border;
+		font-size: 12px;
+		border-radius: 2px;
+		padding: 0px 25px 0px 10px;
+		line-height: @height-normal - 2px;
+		display: inline-block;
+		transition: all 0.12s ease;
+		&:hover,
+		&:focus-within {
+			border-color: @color-primary;
+		}
+		.xui-single-text {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			width: 100%;
+		}
+	}
+	.xui-select-placeholder {
+		color: @color-placeholder;
+		height: @height-normal - 2px;
+	}
+	.select-trigger-icon {
+		font-size: 12px;
+		right: 10px;
+		color: @color-subcolor;
+		transform: rotate(0deg) translateZ(0);
+		transition: all 0.2s;
+	}
+	&.open {
+		.select-trigger-icon {
+			transform: rotate(180deg) translateZ(0);
+		}
+	}
+	&.disabled {
+		.xui-select-inputwrap {
+			background: @color-disabled;
+			&:hover,
+			&:focus-within {
+				border-color: @color-border;
+			}
+		}
+	}
+}
+
+.xui-picker.xui-picker-style.xui-select-picker {
+	border-radius: 2px;
+	.xui-select-option {
+		height: @height-normal - 2px;
+		line-height: @height-normal - 2px;
+		padding: 0px 15px;
+		font-size: 12px;
+		background:@color-background-widget;
+		color:@color-content;
+		&.active {
+			background: @color-background;
+			font-weight: bold;
+			color: @color-primary;
+		}
+		&:hover {
+			background: lighten(@color-background,5%);
+		}
+	}
+	.scroll-bar-slider {
+		background-color: @color-primary-light;
+	}
+}
