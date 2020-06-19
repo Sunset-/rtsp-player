@@ -20,11 +20,14 @@
                     </div>
                 </div>
                 <div class="video-panels">
+                    <video id="yxm_video" class="video-js vjs-default-skin vjs-big-play-centered">
+                        <p class="vjs-no-js">您的浏览器不支持H5或FLASH</p>
+                    </video>
                     <video-player v-for="vp in videos" :key="vp.id" :rtsp="vp.rtsp" @close="remove(vp)">
                         <video id="video"></video>
                     </video-player>
                 </div>
-                <canvas id="canvas_9990" style="width:500px;"></canvas>
+                <canvas id="canvas_9990" style="width:200px;"></canvas>
             </div>
         </div>
     </div>
@@ -34,6 +37,8 @@ import HomeComponents from "./components";
 import Store from "./store.js";
 import VideoPlayer from "./player.vue";
 
+import "video.js/dist/video-js.min.css";
+import videojs from "video.js";
 const exec = require("child_process").exec;
 
 export default {
@@ -66,9 +71,11 @@ export default {
         };
     },
     methods: {
-        open(){
-// 执行命令行，如果命令不需要路径，或就是项目根目录，则不需要cwd参数：
-            var workerProcess = exec(`D:\\js_workspace\\rtsp-player\\media.exe`);
+        open() {
+            // 执行命令行，如果命令不需要路径，或就是项目根目录，则不需要cwd参数：
+            var workerProcess = exec(
+                `D:\\js_workspace\\rtsp-player\\media.exe`
+            );
             // 不受child_process默认的缓冲区大小的使用方法，没参数也要写上{}：workerProcess = exec(cmdStr, {})
             // 打印正常的后台可执行程序输出
             workerProcess.stdout.on("data", function(data) {
@@ -88,7 +95,27 @@ export default {
             return;
         },
         play(url) {
-            
+            var player = videojs(
+                "yxm_video",
+                {
+                    width: 500,
+                    controls: true,
+                    preload: "true", //预加载：string；'auto'|'true'|'metadata'|'none'
+                    //poster:'source/suoluetu.jpg',//预览图：string
+                    autoplay: true,
+                    loop: false,
+                    muted: false, //静音
+                    sources: "rtmp://202.69.69.180:443/webcast/bshdlive-pc",
+                    controlBar: {
+                        muteToggle: false, //静音按钮
+                        volumeMenuButton: false, // 音量调节
+                        progressControl: false
+                    }
+                },
+                function onPlayerReady() {}
+            );
+
+            return;
             var rtsp = url || this.rtspUrl;
             if (!rtsp) {
                 return;
