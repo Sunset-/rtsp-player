@@ -1,5 +1,6 @@
 <template>
     <div class="MODULE-Home">
+        <webview src="https://www.adobe.com/software/flash/about/" plugins></webview>
         <home-components ref="components" class="BOX home-components-wrap"></home-components>
         <div class="BOX home-component-frame">
             <div class="report-header">
@@ -20,12 +21,16 @@
                     </div>
                 </div>
                 <div class="video-panels">
+                    <img width="100" src="static/02.jpg" />
                     <video id="yxm_video" class="video-js vjs-default-skin vjs-big-play-centered">
-                        <p class="vjs-no-js">您的浏览器不支持H5或FLASH</p>
+                        <source src='rtmp://58.200.131.2:1935/livetv/hunantv' type='rtmp/flv'/>
+                        <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a
+                            web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports
+                                HTML5 video</a></p>
                     </video>
-                    <video-player v-for="vp in videos" :key="vp.id" :rtsp="vp.rtsp" @close="remove(vp)">
+                    <!-- <video-player v-for="vp in videos" :key="vp.id" :rtsp="vp.rtsp" @close="remove(vp)">
                         <video id="video"></video>
-                    </video-player>
+                    </video-player> -->
                 </div>
                 <canvas id="canvas_9990" style="width:200px;"></canvas>
             </div>
@@ -39,7 +44,36 @@ import VideoPlayer from "./player.vue";
 
 import "video.js/dist/video-js.min.css";
 import videojs from "video.js";
+
 const exec = require("child_process").exec;
+
+function flashChecker() {
+    var hasFlash = 0; //是否安装了flash
+    var flashVersion = 0; //flash版本
+    var isIE = /*@cc_on!@*/ 0; //是否IE浏览器
+
+    if (isIE) {
+        var swf = new ActiveXObject("ShockwaveFlash.ShockwaveFlash");
+        if (swf) {
+            hasFlash = 1;
+            VSwf = swf.GetVariable("$version");
+            flashVersion = parseInt(VSwf.split(" ")[1].split(",")[0]);
+        }
+    } else {
+        if (navigator.plugins && navigator.plugins.length > 0) {
+            var swf = navigator.plugins["Shockwave Flash"];
+            if (swf) {
+                hasFlash = 1;
+                var words = swf.description.split(" ");
+                for (var i = 0; i < words.length; ++i) {
+                    if (isNaN(parseInt(words[i]))) continue;
+                    flashVersion = parseInt(words[i]);
+                }
+            }
+        }
+    }
+    return { f: hasFlash, v: flashVersion };
+}
 
 export default {
     components: {
@@ -95,25 +129,44 @@ export default {
             return;
         },
         play(url) {
-            var player = videojs(
-                "yxm_video",
-                {
-                    width: 500,
-                    controls: true,
-                    preload: "true", //预加载：string；'auto'|'true'|'metadata'|'none'
-                    //poster:'source/suoluetu.jpg',//预览图：string
-                    autoplay: true,
-                    loop: false,
-                    muted: false, //静音
-                    sources: "rtmp://202.69.69.180:443/webcast/bshdlive-pc",
-                    controlBar: {
-                        muteToggle: false, //静音按钮
-                        volumeMenuButton: false, // 音量调节
-                        progressControl: false
-                    }
-                },
-                function onPlayerReady() {}
-            );
+            var fls = flashChecker();
+
+            var s = "";
+            if (fls.f) {
+                // document.getElementsByClassName("openFlash")[0].style.display =
+                //     "none";
+               alert("您安装了flash,当前flash版本为: " + fls.v + ".x");
+            } else {
+                // document.getElementsByClassName("openFlash")[0].style.display =
+                //     "block";
+                alert("您没有安装flash");
+            }
+            var player = videojs("yxm_video",{
+                flash:{
+                    swf : "http://vjs.zencdn.net/swf/5.4.1/video-js.swf"//"static/video-js.swf"
+                }
+            });
+            player.ready(() => {
+                alert(123);
+                player.play();
+            });
+            //     {
+            //         width: 500,
+            //         controls: true,
+            //         preload: "true", //预加载：string；'auto'|'true'|'metadata'|'none'
+            //         //poster:'source/suoluetu.jpg',//预览图：string
+            //         autoplay: true,
+            //         loop: false,
+            //         muted: false, //静音
+            //         sources: "rtmp://202.69.69.180:443/webcast/bshdlive-pc",
+            //         controlBar: {
+            //             muteToggle: false, //静音按钮
+            //             volumeMenuButton: false, // 音量调节
+            //             progressControl: false
+            //         }
+            //     },
+            //     function onPlayerReady() {}
+            // );
 
             return;
             var rtsp = url || this.rtspUrl;

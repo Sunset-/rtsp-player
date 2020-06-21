@@ -44,7 +44,8 @@
       "icon": "build/icons/icon.icns"
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/icon.ico",
+      "extraResources": "./lib/*.dll"
     },
     "linux": {
       "icon": "build/icons"
@@ -79,6 +80,7 @@
     "electron-builder": "^20.19.2",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",
+    "express": "^4.17.1",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^3.2.0",
     "jquery": "^3.5.1",
@@ -88,6 +90,7 @@
     "nedb": "^1.8.0",
     "node-loader": "^0.6.0",
     "node-sass": "^4.9.2",
+    "nw-flash-trust": "^0.3.0",
     "sass-loader": "^7.0.3",
     "style-loader": "^0.21.0",
     "url-loader": "^1.0.1",
