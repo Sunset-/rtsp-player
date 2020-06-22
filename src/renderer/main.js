@@ -8,7 +8,6 @@ import router from "./router";
 import "./vendor/index.js";
 import "./services/index.js";
 import "./style/index.less";
-
 //引入组件库
 import NetPosaXUI from "./netposa_xui/index.js";
 Vue.use(NetPosaXUI);

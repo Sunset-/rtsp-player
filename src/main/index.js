@@ -85,8 +85,8 @@ app.on('ready', () => {
 })
  */
 
-const flashTrust = require("nw-flash-trust");
-const appName = "rtsp-player";
-const trustManager = flashTrust.initSync(appName);
-trustManager.add(path.join(__dirname, "..", "..", "static", "video-js.swf"));
-console.log(trustManager.list());
+// const flashTrust = require("nw-flash-trust");
+// const appName = "rtsp-player";
+// const trustManager = flashTrust.initSync(appName);
+// trustManager.add(path.join(__dirname, "..", "..", "static", "video-js.swf"));
+// console.log(trustManager.list());
