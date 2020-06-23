@@ -10,10 +10,7 @@
                 <button type="button" @click="play(demo1)">湖南台直播</button>
             </div>
             <div class="BOX home-component-content" style="overflow-y:scroll;">
-                <div class="video-panels">
-                    <video-player v-for="vp in videos" :key="vp.id" :rtmp="vp.rtmp" @close="remove(vp)"></video-player>
-                </div>
-                <canvas id="canvas_9990" style="width:200px;"></canvas>
+                <player-wall ref="playerWall" class="rtmp-player-wall"></player-wall>
             </div>
         </div>
     </div>
@@ -21,12 +18,10 @@
 <script>
 import HomeComponents from "./components";
 import Store from "./store.js";
-import VideoPlayer from "./rtmpPlayer.vue";
 
 export default {
     components: {
-        HomeComponents,
-        VideoPlayer
+        HomeComponents
     },
     computed: {},
     data() {
@@ -44,8 +39,7 @@ export default {
                 ]
             },
             rtmpUrl: "rtmp://58.200.131.2:1935/livetv/hunantv",
-            demo1: "rtmp://58.200.131.2:1935/livetv/hunantv",
-            videos: []
+            demo1: "rtmp://58.200.131.2:1935/livetv/hunantv"
         };
     },
     methods: {
@@ -54,9 +48,8 @@ export default {
             if (!rtmp) {
                 return;
             }
-            this.videos.push({
-                id: Date.now(),
-                rtmp: rtmp
+            this.$refs.playerWall.play({
+                src: rtmp
             });
         },
         remove(v) {
@@ -107,27 +100,11 @@ export default {
         }
     }
 }
-.video-panel {
-    box-sizing: border-box;
-    max-width: 100%;
-    width: 500px;
-    height:400px;
-    border: 2px solid #ccc;
-}
-.demos {
-    border-top: 1px solid #565656;
-    margin-top: 5px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-.demos button {
-    margin: 2px;
-}
-.video-panel video {
-    width: 100%;
-    height:100%;
-}
-.video-panels > div {
-    display: inline-block;
+.rtmp-player-wall {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
 }
 </style>
