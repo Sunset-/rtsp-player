@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from "electron";
+import './store.js';
 const { resolve } = require("path");
 var path = require("path");
 
@@ -37,6 +38,9 @@ function createWindow() {
 		height: 563,
 		useContentSize: true,
 		width: 1000,
+		// transparent: true, 
+		// frame: false,
+		autoHideMenuBar: true,
 		webPreferences: {
 			plugins: true,
 			webSecurity: false,

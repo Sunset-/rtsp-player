@@ -1,27 +1,29 @@
 <template>
     <div class="MODULE-Home">
         <webview src="https://www.adobe.com/software/flash/about/" plugins></webview>
-        <home-components ref="components" class="BOX home-components-wrap"></home-components>
-        <div class="BOX home-component-frame">
-            <div class="report-header">
-                <span>RTSP地址：</span>
-                <input v-model="rtmpUrl">
-                <button type="button" @click="play()">连接webrtc</button>
-                <button type="button" @click="play(demo1)">湖南台直播</button>
-            </div>
-            <div class="BOX home-component-content" style="overflow-y:scroll;">
-                <player-wall ref="playerWall" class="rtmp-player-wall"></player-wall>
-            </div>
+        <div class="home-header">
+            <div class="logo">警视联动</div>
+            <span>RTMP地址：</span>
+            <input v-model="rtmpUrl" style="width:500px;">
+            <button type="button" @click="play()">连接</button>
+            <button type="button" @click="play(demo1)">湖南台直播</button>
+            <button type="button" @click="request()">请求</button>
+        </div>
+        <div class="BOX home-sidebar">
+            <home-resources ref="resources" @selected="onSelected"></home-resources>
+        </div>
+        <div class="BOX home-major">
+            <player-wall ref="playerWall" class="rtmp-player-wall" @stop="onStop"></player-wall>
         </div>
     </div>
 </template>
 <script>
-import HomeComponents from "./components";
+import HomeResources from "./resources";
 import Store from "./store.js";
 
 export default {
     components: {
-        HomeComponents
+        HomeResources
     },
     computed: {},
     data() {
@@ -54,6 +56,18 @@ export default {
         },
         remove(v) {
             this.videos = this.videos.filter(cv => cv.id != v.id);
+        },
+        onSelected(camera) {
+            Store.getStreamURL(camera.cameraIndexCode).then(url => {
+                console.log('stream-url:',url)
+                this.$refs.playerWall.play(camera, url || this.demo1);
+            });
+        },
+        onStop(camera) {
+            this.$refs.resources.removeFocus(camera.cameraIndexCode);
+        },
+        request() {
+            Store.loadAllReources();
         }
     }
 };
@@ -62,49 +76,45 @@ export default {
 @import "~@/style/variable.less";
 
 .MODULE-Home {
-    @sidebar-width: 200px;
-    .home-components-wrap {
+    @sidebar-width: 220px;
+    @header-height: 45px;
+    .home-header {
+        width: 100%;
+        background: #e7eaed;
+        border-bottom: 1px solid #e7eaed;
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.05);
+        border-collapse: separate !important;
+        padding: 0px 10px;
+        line-height: @header-height;
+        box-sizing: border-box;
+        .logo {
+            color: orange;
+            font-size: 20px;
+            display: inline-block;
+            padding: 0px 15px;
+        }
+    }
+    .home-sidebar {
+        top: @header-height;
         width: @sidebar-width;
         right: auto;
         background: @color-background-side;
         box-sizing: border-box;
         border-right: 1px solid @color-border;
     }
-    .report-title {
-        font-size: 20px;
-    }
-    .report-subtitle {
-        display: inline-block;
-        padding-left: 10px;
-        font-size: 12px;
-    }
 
-    .home-component-frame {
+    .home-major {
+        top: @header-height;
         left: @sidebar-width;
         background: @color-background-major;
         color: @color-content;
-        .report-header {
-            width: 100%;
-            background: #e7eaed;
-            border-bottom: 1px solid #e7eaed;
-            box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.05);
-            border-collapse: separate !important;
-            padding: 0px 10px;
-            line-height: 45px;
-            box-sizing: border-box;
-        }
-        .home-component-content {
-            padding: 10px;
-            top: 45px;
-            background: #fff;
+        .rtmp-player-wall {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
         }
     }
-}
-.rtmp-player-wall {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
 }
 </style>

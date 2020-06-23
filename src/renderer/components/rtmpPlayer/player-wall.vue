@@ -1,7 +1,7 @@
 <template>
     <div class="player-wall">
-        <div :class="['player-wall-wrap',currentPlayer==item?'active':'']" v-for="(item,index) in players" :key="index" @click="selectPlayer(item)">
-            <rtmp-player :src='item.src'></rtmp-player>
+        <div :class="['player-wall-wrap',currentPlayer==item?'active':'']" v-for="(item,index) in players" :key="index" @mousedown="selectPlayer(item)">
+            <rtmp-player :src='item.src' @close="stop(item)"></rtmp-player>
         </div>
     </div>
 </template>
@@ -9,27 +9,50 @@
 export default {
     data() {
         return {
-            players: [{
-                src : ''
-            }, {
-                src : ''
-            }, {
-                src : ''
-            }, {
-                src : ''
-            }],
-            currentPlayer : null
+            players: [
+                {
+                    src: "",
+                    resource : null
+                },
+                {
+                    src: "",
+                    resource : null
+                },
+                {
+                    src: "",
+                    resource : null
+                },
+                {
+                    src: "",
+                    resource : null
+                }
+            ],
+            currentPlayer: null
         };
     },
-    methods : {
-        play(options){
-            this.currentPlayer.src = options.src;
+    methods: {
+        play(resource,src) {
+            var player = null;
+            if (!this.currentPlayer.src) {
+                player = this.currentPlayer;
+            } else if (!(player = this.players.filter(item => !item.src)[0])) {
+                player = this.currentPlayer;
+            }
+            player.resource = resource;
+            player.src = src;
+            this.currentPlayer = player;
         },
-        selectPlayer(item){
+        stop(item) {
+            var resource = item.resource;
+            item.src = null;
+            item.resource = null;
+            this.$emit("stop",resource)
+        },
+        selectPlayer(item) {
             this.currentPlayer = item;
         }
     },
-    mounted(){
+    mounted() {
         this.currentPlayer = this.players[0];
     }
 };
@@ -45,8 +68,8 @@ export default {
         display: inline-block;
         vertical-align: top;
         border: 1px solid rgb(255, 255, 255);
-        &.active{
-            border-color:rgb(18, 123, 254);
+        &.active {
+            border-color: rgb(18, 123, 254);
         }
     }
 }

@@ -1,5 +1,5 @@
 <template>
-    <div id="app" class="MODULE-CONTAINER" style="min-width:1200px;overflow:hidden;">
+    <div id="app" class="MODULE-CONTAINER" style="min-width:1000px;overflow:hidden;">
         <router-view></router-view>
     </div>
 </template>
