@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const https = require("https");
+import Store from "./store.js";
 
 const ERR_CODE = {
   "0x02401000": "APPKey为空", // 	请求中填写正确的APP Key
@@ -67,71 +68,96 @@ function signature(httpOpts) {
 }
 
 function $http(options) {
-  var httpOpts = {
-    hostname: options.host,
-    port: options.port || 443, //443
-    path: options.url,
-    method: (options.type || "POST").toUpperCase(),
-    rejectUnauthorized: false,
-  };
-  var bodyData = JSON.stringify(options.data);
-  //degist body
-  var contentMd5 = crypto
-    .createHash("md5")
-    .update(bodyData || "")
-    .digest("base64");
-  //headers
-  httpOpts.headers = {
-    "User-Agent": "PostmanRuntime/7.25.0",
-    Accept: "*/*",
-    "Content-MD5": contentMd5,
-    "Content-Type": "application/json",
-    Date: Date.now(),
-  };
-  //sign
-  signature(httpOpts);
+  return Store.getConfig().then((config) => {
+    var mediaPlatformAddress = config.mediaPlatformAddress || "";
+    console.log(mediaPlatformAddress,options.url)
+    var ip_port = mediaPlatformAddress.split(":");
+    var httpOpts = {
+      hostname: ip_port[0],
+      port: ip_port[1] || 443, //443
+      path: options.url,
+      method: (options.type || "POST").toUpperCase(),
+      rejectUnauthorized: false,
+    };
+    var bodyData = JSON.stringify(options.data);
+    //degist body
+    var contentMd5 = crypto
+      .createHash("md5")
+      .update(bodyData || "")
+      .digest("base64");
+    //headers
+    httpOpts.headers = {
+      "User-Agent": "PostmanRuntime/7.25.0",
+      Accept: "*/*",
+      "Content-MD5": contentMd5,
+      "Content-Type": "application/json",
+      Date: Date.now(),
+    };
+    //sign
+    signature(httpOpts);
 
-  return new Promise((resolve, reject) => {
-    var req = https.request(httpOpts, function(res) {
-      res.setEncoding("utf-8");
-      var buff = "";
-      res.on("data", function(chunk) {
-        buff += chunk;
-      });
-      res.on("end", function(chunk) {
-        console.log("end:" + buff);
-        try {
-          var data = JSON.parse(buff);
-          if (data && data.code == "0") {
-            resolve(data.data);
-          } else if (data) {
-            $tip(`${data.code}:${ERR_CODE[data.code] || "未知错误"}`);
-            reject(`${data.code}:${ERR_CODE[data.code] || "未知错误"}`);
-          } else {
-            $tip(`未知错误`);
-            reject("未知错误");
+    return new Promise((resolve, reject) => {
+      var req = https.request(httpOpts, function(res) {
+        res.setEncoding("utf-8");
+        var buff = "";
+        res.on("data", function(chunk) {
+          buff += chunk;
+        });
+        res.on("end", function(chunk) {
+          console.log("end:" + buff);
+          try {
+            var data = JSON.parse(buff);
+            if (data && data.code == "0") {
+              resolve(data.data);
+            } else if (data) {
+              $tip(`${data.code}:${ERR_CODE[data.code] || "未知错误"}`);
+              reject(`${data.code}:${ERR_CODE[data.code] || "未知错误"}`);
+            } else {
+              $tip(`未知错误`);
+              reject("未知错误");
+            }
+          } catch (e) {
+            resolve(buff);
           }
-        } catch (e) {
-          resolve(buff);
-        }
+        });
       });
+      req.setTimeout(5 * 1000);
+      if (bodyData) {
+        req.write(bodyData);
+      }
+      req.on("error", function(e) {
+        reject(e);
+      });
+      req.write("");
+      req.end();
     });
-    req.setTimeout(5 * 1000);
-    if (bodyData) {
-      req.write(bodyData);
-    }
-    req.on("error", function(e) {
-      reject(e);
-    });
-    req.write("");
-    req.end();
-    console.log(3);
   });
 }
 
 var http = require("http");
 
 export default {
+  loadAllReources() {
+    return Promise.all([this.loadAllRegions(), this.loadAllCameras()]).then(
+      (res) => {
+        var regionNodes = res[0].map((item) => {
+          item.id = item.indexCode;
+          item.parentId = item.parentIndexCode;
+          item.isParent = true;
+          return item;
+        });
+        var resourceNodes = res[1].map((item) => {
+          item.id = item.cameraIndexCode;
+          item.parentId = item.regionIndexCode;
+          item.isParent = false;
+          item.name = item.cameraName;
+          return item;
+        });
+        console.log(2);
+        return regionNodes.concat(resourceNodes);
+      }
+    );
+  },
   loadAllRegions() {
     return $http({
       host: "www.baidu.com",
@@ -262,13 +288,12 @@ export default {
   },
   getStreamURL(cameraIndexCode) {
     return $http({
-      host: "www.baidu.com",
       url: "/api/video/v1/cameras/previewURLs",
       data: {
         cameraIndexCode: cameraIndexCode,
         protocol: "rtmp",
       },
-    }).then(res=>{
+    }).then((res) => {
       return res.url;
     });
   },

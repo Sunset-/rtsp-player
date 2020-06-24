@@ -1,15 +1,23 @@
 <template>
     <div class="resources-wrap">
-        <xui-fasttree ref="tree" class="resource-tree" :options="options" @selected-node="selected" style="height:100%;"></xui-fasttree>
+        <xui-fasttree ref="tree" class="resource-tree" :options="treeOptions" @init="onInited" @selected-node="selected" @checked="onChecked" style="height:100%;"></xui-fasttree>
     </div>
 </template>
 <script>
+import HikSDK from "./hiksdk.js";
 import Store from "./store.js";
 
 export default {
+    props: {
+        options: {}
+    },
     data() {
-        return {
-            options: {
+        return {};
+    },
+    computed: {
+        treeOptions() {
+            var safeOptions = this.options || {};
+            return {
                 rootId: "null",
                 key: {
                     id: "id",
@@ -24,56 +32,28 @@ export default {
                     multiple: true,
                     focusOn: "dbclick"
                 },
+                check: {
+                    enable: safeOptions.check,
+                    type: "multiple",
+                    cascade: "C"
+                },
                 isExpandOnDbClickNode: true,
                 isAutoExpandRoot: true,
                 nodeHeight: 30,
-                levelSpace : 17,
+                levelSpace: 17,
                 template(node) {
                     var icon;
                     if (node.isParent) {
                         icon = "";
-                    }else{
+                    } else {
                         icon = "iconfont iconshexiangji";
                     }
-                    if (node.nodeType == 2) {
-                        if (node.type == 1) {
-                            icon = "iconfont iconshexiangji";
-                        } else if (node.type == 2) {
-                            icon = "iconfont iconcheliangzhuapaiji";
-                        } else if (node.type == 3) {
-                            icon = "iconfont iconwifi";
-                        } else if (node.type == 11) {
-                            icon = "iconfont iconrenlianzhuapaiji";
-                        } else if (node.type == 6) {
-                            icon = "iconfont iconGPS";
-                        } else if (node.type == 4) {
-                            icon = "iconfont icondianziweilan";
-                        } else if (node.type == 5) {
-                            icon = "iconfont iconRFID";
-                        } else if (node.type == 7) {
-                            icon = "iconfont icongaokongxiangji";
-                        } else if (node.type == 14) {
-                            icon = "iconfont iconweikakou";
-                        } else if (node.type == 15) {
-                            icon = "iconfont iconqiakou";
-                        } else if (node.type == 16) {
-                            icon = "iconfont icondianzijingcha";
-                        } else if (node.type == 20) {
-                            icon = "iconfont iconwifitanzhen";
-                        } else if (node.type == 21) {
-                            icon = "iconfont iconganzhishebei";
-                        } else if (node.type == 22) {
-                            icon = "iconfont iconjinggai";
-                        } else if (node.type == 23) {
-                            icon = "iconfont iconmenjin";
-                        } else if (node.type == 24) {
-                            icon = "iconfont iconxiaoqushexiangtou";
-                        } else {
-                            icon = "iconfont iconshushebei1";
-                        }
-                    }
                     return `<div class="resource-tree-node">
-                    ${icon?`<i  style="font-weight:600;font-size:14px;" class="resource-tree-node-icon ${icon}"></i>`:''}
+                    ${
+                        icon
+                            ? `<i  style="font-weight:600;font-size:14px;" class="resource-tree-node-icon ${icon}"></i>`
+                            : ""
+                    }
                     <span style="${
                         node.isLive ? "color:#4CAF50" : ""
                     }" class="resource-tree-node-label">${node.name}${
@@ -92,8 +72,49 @@ export default {
                 },
                 datasource: parentNode => {
                     if (!parentNode) {
-                        return Store.loadAllReources().then(res => {
-                            return res;
+                        return HikSDK.loadAllReources().then(res => {
+                            return (safeOptions.auth
+                                ? Store.getConfig().then(cfg => {
+                                      cfg = cfg || {};
+                                      return (cfg.authResources || []).reduce(
+                                          (m, item) => {
+                                              m[item.id] = true;
+                                              return m;
+                                          },
+                                          {}
+                                      );
+                                  })
+                                : Promise.resolve({})
+                            ).then(authResource => {
+                                var haveResourceRegion = {};
+                                res &&
+                                    res.forEach(item => {
+                                        if (item.cameraIndexCode) {
+                                            if (
+                                                !safeOptions.auth ||
+                                                authResource[item.id]
+                                            ) {
+                                                haveResourceRegion[
+                                                    item.parentId
+                                                ] = true;
+                                            }
+                                        } else {
+                                            haveResourceRegion[
+                                                item.parentId
+                                            ] = true;
+                                        }
+                                    });
+                                return res.filter(item => {
+                                    if (item.cameraIndexCode) {
+                                        return (
+                                            !safeOptions.auth ||
+                                            authResource[item.id]
+                                        );
+                                    } else {
+                                        return haveResourceRegion[item.id];
+                                    }
+                                });
+                            });
                         });
                         return [
                             {
@@ -106,16 +127,35 @@ export default {
                         return [];
                     }
                 }
-            }
-        };
+            };
+        }
     },
     methods: {
-        selected(node,flag) {
-            console.log(node,flag)
+        selected(node, flag) {
+            console.log(node, flag);
             this.$emit("selected", node);
         },
         removeFocus(id) {
             this.$refs.tree.selectNode(id, false);
+        },
+        refresh() {
+            this.$refs.tree.init();
+        },
+        onChecked(nodes) {
+            this.$emit("checked", nodes);
+            var resources =
+                nodes && nodes.filter(item => !!item.cameraIndexCode);
+            this.$emit("checked-resource", resources);
+        },
+        clearChecked(slient) {
+            this.$refs.tree.clearChecked(slient);
+        },
+        checkNodes(...args) {
+            this.$refs.tree &&
+                this.$refs.tree.checkNodes.apply(this.$refs.tree, args);
+        },
+        onInited(rootNode) {
+            this.$emit("inited", rootNode);
         }
     },
     mounted() {}
@@ -130,7 +170,7 @@ export default {
     right: 0px;
     bottom: 0px;
     overflow-x: auto;
-    padding-left:5px;
+    padding-left: 5px;
 }
 @node-height: 30px;
 
@@ -183,7 +223,7 @@ export default {
             &.selected {
                 background: fade(orange, 15%);
                 color: orange;
-                .resource-tree-node-icon{
+                .resource-tree-node-icon {
                     color: orange;
                 }
                 .resource-tree-node {
@@ -288,6 +328,8 @@ export default {
             //checked
             .xui-fasttree-checker {
                 border-radius: 2px;
+                margin-left: 0px;
+                margin-right: 4px;
                 &.checked {
                     &.multiple {
                         border: 1px solid @color-primary;
@@ -388,7 +430,7 @@ export default {
         .resource-tree-node-icon {
             margin: 0px 2px 0px 3px;
             vertical-align: middle;
-            color: #FFF;
+            color: #fff;
             font-size: 14px;
             padding-right: 3px;
         }

@@ -54,12 +54,12 @@ var $db = (window.$db = {
       );
     });
   },
-  find(modelName, query,sort) {
+  find(modelName, query, sort) {
     return new Promise((resolve, reject) => {
       var store = this.store(modelName);
       var q = store.find(query);
-      if(sort){
-        q = q.sort(sort)
+      if (sort) {
+        q = q.sort(sort);
       }
       q.exec((err, models) => {
         if (err != null) {
@@ -86,7 +86,8 @@ var $db = (window.$db = {
     return new Promise((resolve, reject) => {
       var store = this.store(modelName);
       store.remove(
-        query._id ? { _id: query._id } : query,{ multi: true },
+        query._id ? { _id: query._id } : query,
+        { multi: true },
         (err, numRemoved) => {
           if (err != null) {
             reject(err);
@@ -96,5 +97,5 @@ var $db = (window.$db = {
         }
       );
     });
-  }
+  },
 });

@@ -1,28 +1,17 @@
-import HikSDK from "./hiksdk.js";
+var configCache = null;
 
 export default {
-  loadAllReources() {
-    return Promise.all([HikSDK.loadAllRegions(), HikSDK.loadAllCameras()]).then(
-      (res) => {
-        var regionNodes = res[0].map((item) => {
-          item.id = item.indexCode;
-          item.parentId = item.parentIndexCode;
-          item.isParent = true;
-          return item;
-        });
-        var resourceNodes = res[1].map((item) => {
-          item.id = item.cameraIndexCode;
-          item.parentId = item.regionIndexCode;
-          item.isParent = false;
-          item.name = item.cameraName;
-          return item;
-        });
-        console.log(2);
-        return regionNodes.concat(resourceNodes);
-      }
-    );
+  setConfig(model) {
+    configCache = null;
+    model._id = "$config_id";
+    return $db.save("CONFIG", model);
   },
-  getStreamURL(id) {
-    return HikSDK.getStreamURL(id);
+  getConfig() {
+    if (configCache) {
+      return Promise.resolve(configCache);
+    }
+    return $db.find("CONFIG", { _id: "$config_id" }).then((res) => {
+      return (configCache = res[0] || {});
+    });
   },
 };

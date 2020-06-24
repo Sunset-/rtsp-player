@@ -32,6 +32,7 @@ export default {
     },
     methods: {
         play(resource,src) {
+            console.log("play rtmp:",src)
             var player = null;
             if (!this.currentPlayer.src) {
                 player = this.currentPlayer;

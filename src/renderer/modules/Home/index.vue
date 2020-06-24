@@ -3,42 +3,41 @@
         <webview src="https://www.adobe.com/software/flash/about/" plugins></webview>
         <div class="home-header">
             <div class="logo">警视联动</div>
-            <span>RTMP地址：</span>
-            <input v-model="rtmpUrl" style="width:500px;">
-            <button type="button" @click="play()">连接</button>
-            <button type="button" @click="play(demo1)">湖南台直播</button>
-            <button type="button" @click="request()">请求</button>
+            <span class="config-trigger" @click="editResourceConfig">
+                资源配置
+            </span>
+            <span class="config-trigger" @click="editConfig">
+                系统配置
+            </span>
         </div>
         <div class="BOX home-sidebar">
-            <home-resources ref="resources" @selected="onSelected"></home-resources>
+            <home-resources ref="resources" :options="treeOptions" @selected="onSelected"></home-resources>
         </div>
         <div class="BOX home-major">
             <player-wall ref="playerWall" class="rtmp-player-wall" @stop="onStop"></player-wall>
         </div>
+        <home-config ref="configer" @refresh="configRefresh"></home-config>
+        <resource-config ref="resourceConfiger" @refresh="configRefresh"></resource-config>
     </div>
 </template>
 <script>
+import HomeConfig from "./config";
+import ResourceConfig from "./resourceConfig";
 import HomeResources from "./resources";
 import Store from "./store.js";
+import HikSDK from "./hiksdk.js";
 
 export default {
     components: {
+        HomeConfig,
+        ResourceConfig,
         HomeResources
     },
     computed: {},
     data() {
         return {
-            toolbarOptions: {
-                tools: [
-                    {
-                        label: "还原",
-                        icon: "xui-icon xui-icon-refresh",
-                        color: "white",
-                        operate: () => {
-                            this.open();
-                        }
-                    }
-                ]
+            treeOptions:{
+                auth : true
             },
             rtmpUrl: "rtmp://58.200.131.2:1935/livetv/hunantv",
             demo1: "rtmp://58.200.131.2:1935/livetv/hunantv"
@@ -58,16 +57,22 @@ export default {
             this.videos = this.videos.filter(cv => cv.id != v.id);
         },
         onSelected(camera) {
-            Store.getStreamURL(camera.cameraIndexCode).then(url => {
-                console.log('stream-url:',url)
+            HikSDK.getStreamURL(camera.cameraIndexCode).then(url => {
+                console.log("stream-url:", url);
                 this.$refs.playerWall.play(camera, url || this.demo1);
             });
         },
         onStop(camera) {
             this.$refs.resources.removeFocus(camera.cameraIndexCode);
         },
-        request() {
-            Store.loadAllReources();
+        editConfig() {
+            this.$refs.configer.open();
+        },
+        editResourceConfig(){
+            this.$refs.resourceConfiger.open();
+        },
+        configRefresh(){
+            this.$refs.resources.refresh();
         }
     }
 };
@@ -92,6 +97,14 @@ export default {
             font-size: 20px;
             display: inline-block;
             padding: 0px 15px;
+        }
+        .config-trigger {
+            float: right;
+            padding:0px 10px;
+            cursor: pointer;
+            &:hover {
+                color: orange;
+            }
         }
     }
     .home-sidebar {

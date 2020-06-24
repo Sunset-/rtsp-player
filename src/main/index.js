@@ -44,6 +44,8 @@ function createWindow() {
 		webPreferences: {
 			plugins: true,
 			webSecurity: false,
+			nodeIntegrationInWorker : true,
+			enablemotemodule:true,
 			nodeIntegration: true, //在网页中集成Node
 		},
 	});
