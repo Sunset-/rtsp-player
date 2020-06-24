@@ -3,6 +3,9 @@
         <webview src="https://www.adobe.com/software/flash/about/" plugins></webview>
         <div class="home-header">
             <div class="logo">警视联动</div>
+            <span class="config-trigger" @click="test">
+                测试
+            </span>
             <span class="config-trigger" @click="editResourceConfig">
                 资源配置
             </span>
@@ -27,6 +30,8 @@ import HomeResources from "./resources";
 import Store from "./store.js";
 import HikSDK from "./hiksdk.js";
 
+import http from "http";
+
 export default {
     components: {
         HomeConfig,
@@ -36,8 +41,8 @@ export default {
     computed: {},
     data() {
         return {
-            treeOptions:{
-                auth : true
+            treeOptions: {
+                auth: true
             },
             rtmpUrl: "rtmp://58.200.131.2:1935/livetv/hunantv",
             demo1: "rtmp://58.200.131.2:1935/livetv/hunantv"
@@ -68,11 +73,63 @@ export default {
         editConfig() {
             this.$refs.configer.open();
         },
-        editResourceConfig(){
+        editResourceConfig() {
             this.$refs.resourceConfiger.open();
         },
-        configRefresh(){
+        configRefresh() {
             this.$refs.resources.refresh();
+        },
+        test() {
+            var httpOpts = {
+                host: "61.135.169.125",
+                method: "POST",
+                port: 443,
+                path: "/api/test"
+            };
+            var bodyData = "";
+            return new Promise((resolve, reject) => {
+                console.log("---------start");
+                var req = http.request(httpOpts, function(res) {
+                    console.log("---------sended");
+                    res.setEncoding("utf-8");
+                    var buff = "";
+                    res.on("data", function(chunk) {
+                        buff += chunk;
+                    });
+                    res.on("end", function(chunk) {
+                        console.log("end:" + buff);
+                        try {
+                            var data = JSON.parse(buff);
+                            if (data && data.code == "0") {
+                                resolve(data.data);
+                            } else if (data) {
+                                $tip(
+                                    `${data.code}:${ERR_CODE[data.code] ||
+                                        "未知错误"}`
+                                );
+                                reject(
+                                    `${data.code}:${ERR_CODE[data.code] ||
+                                        "未知错误"}`
+                                );
+                            } else {
+                                $tip(`未知错误`);
+                                reject("未知错误");
+                            }
+                        } catch (e) {
+                            resolve(buff);
+                        }
+                    });
+                });
+            });
+            req.setTimeout(5 * 1000);
+            if (bodyData) {
+                req.write(bodyData);
+            }
+            req.on("error", function(e) {
+                reject(e);
+            });
+            req.write("");
+            req.end();
         }
     }
 };
@@ -100,7 +157,7 @@ export default {
         }
         .config-trigger {
             float: right;
-            padding:0px 10px;
+            padding: 0px 10px;
             cursor: pointer;
             &:hover {
                 color: orange;
