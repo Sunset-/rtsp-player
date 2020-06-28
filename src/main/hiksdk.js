@@ -56,14 +56,14 @@ function signature(httpOpts) {
   str += `${httpOpts.headers["Date"]}\n`;
   str += `x-ca-key:${httpOpts.headers["X-Ca-Key"]}\n`;
   str += `${httpOpts.path}`;
-  console.log("[before sign]");
-  console.log(str);
+  // console.log("[before sign]");
+  // console.log(str);
   var s = crypto
     .createHmac("sha256", HIK_SK)
     .update(str, "utf8")
     .digest("base64");
-  console.log("[after sign]");
-  console.log(s);
+  // console.log("[after sign]");
+  // console.log(s);
   httpOpts.headers["X-Ca-Signature"] = s;
 }
 
@@ -75,7 +75,7 @@ function $http(options) {
     })
     .then((config) => {
       var mediaPlatformAddress = config.mediaPlatformAddress || "";
-      console.log(mediaPlatformAddress, options.url);
+      // console.log(mediaPlatformAddress, options.url);
       var ip_port = mediaPlatformAddress.split(":");
       var httpOpts = {
         hostname: ip_port[0],
@@ -109,16 +109,14 @@ function $http(options) {
             buff += chunk;
           });
           res.on("end", function(chunk) {
-            console.log("end:" + buff);
+            // console.log("end:" + buff);
             try {
               var data = JSON.parse(buff);
               if (data && data.code == "0") {
                 resolve(data.data);
               } else if (data) {
-                $tip(`${data.code}:${ERR_CODE[data.code] || "未知错误"}`);
                 reject(`${data.code}:${ERR_CODE[data.code] || "未知错误"}`);
               } else {
-                $tip(`未知错误`);
                 reject("未知错误");
               }
             } catch (e) {
@@ -164,7 +162,6 @@ module.exports = {
   },
   loadAllRegions() {
     return $http({
-      host: "www.baidu.com",
       url: "/artemis/api/resource/v1/regions",
       data: {
         pageNo: 1,
@@ -197,7 +194,6 @@ module.exports = {
   },
   loadAllCameras() {
     return $http({
-      host: "www.baidu.com",
       url: "/artemis/api/resource/v1/cameras",
       data: {
         pageNo: 1,

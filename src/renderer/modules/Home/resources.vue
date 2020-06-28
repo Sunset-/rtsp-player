@@ -75,65 +75,61 @@ export default {
                 },
                 datasource: parentNode => {
                     if (!parentNode) {
-                        return HikSDK.loadAllReources().then(res => {
-                            return (safeOptions.auth
-                                ? Store.getConfig().then(cfg => {
-                                      cfg = cfg || {};
-                                      return (cfg.authResources || []).reduce(
-                                          (m, item) => {
+                        return HikSDK.loadAllReources()
+                            .then(res => {
+                                return (safeOptions.auth
+                                    ? Store.getConfig().then(cfg => {
+                                          cfg = cfg || {};
+                                          return (
+                                              cfg.authResources || []
+                                          ).reduce((m, item) => {
                                               m[item.id] = true;
                                               return m;
-                                          },
-                                          {}
-                                      );
-                                  })
-                                : Promise.resolve({})
-                            ).then(authResource => {
-                                var haveResourceRegion = {};
-                                res &&
-                                    res.forEach(item => {
-                                        if (item.cameraIndexCode) {
-                                            if (
-                                                !safeOptions.auth ||
-                                                authResource[item.id]
-                                            ) {
+                                          }, {});
+                                      })
+                                    : Promise.resolve({})
+                                ).then(authResource => {
+                                    var haveResourceRegion = {};
+                                    res &&
+                                        res.forEach(item => {
+                                            if (item.cameraIndexCode) {
+                                                if (
+                                                    !safeOptions.auth ||
+                                                    authResource[item.id]
+                                                ) {
+                                                    haveResourceRegion[
+                                                        item.parentId
+                                                    ] = true;
+                                                }
+                                            } else {
                                                 haveResourceRegion[
                                                     item.parentId
                                                 ] = true;
                                             }
+                                        });
+                                    this.loadedResources = res.filter(item => {
+                                        if (item.cameraIndexCode) {
+                                            return (
+                                                !safeOptions.auth ||
+                                                authResource[item.id]
+                                            );
                                         } else {
-                                            haveResourceRegion[
-                                                item.parentId
-                                            ] = true;
+                                            return haveResourceRegion[item.id];
                                         }
                                     });
-                                this.loadedResources = res.filter(item => {
-                                    if (item.cameraIndexCode) {
-                                        return (
-                                            !safeOptions.auth ||
-                                            authResource[item.id]
-                                        );
-                                    } else {
-                                        return haveResourceRegion[item.id];
-                                    }
+                                    this.loadedResourceMap = this.loadedResources.reduce(
+                                        (res, item) => {
+                                            res[item.id] = item;
+                                            return res;
+                                        },
+                                        {}
+                                    );
+                                    return this.loadedResources;
                                 });
-                                this.loadedResourceMap = this.loadedResources.reduce(
-                                    (res, item) => {
-                                        res[item.id] = item;
-                                        return res;
-                                    },
-                                    {}
-                                );
-                                return this.loadedResources;
+                            })
+                            .catch(e => {
+                                $tip("请求流媒体平台失败：" + e, "error");
                             });
-                        });
-                        return [
-                            {
-                                id: `1`,
-                                parentId: "0",
-                                name: `node_1`
-                            }
-                        ];
                     } else {
                         return [];
                     }

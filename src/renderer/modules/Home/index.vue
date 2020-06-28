@@ -86,25 +86,39 @@ export default {
         hideSideBar() {
             this.showSideBar = !this.showSideBar;
         },
-        init(){
-            setInterval(()=>{
-                Store.loadAlarmResources().then(res => {
-                    console.log(res);
-                    if(res.length==0){
-                        return;
-                    }
-                    res.forEach(id=>{
-                        var camera = this.$refs.resources.getLoadedResourceById(id);
-                        if(camera){
-                            HikSDK.getStreamURL(camera.cameraIndexCode).then(url => {
-                                this.$refs.playerWall.alarm(camera, url || this.demo1);
-                            });
+        init() {
+            setInterval(() => {
+                Store.loadAlarmResources()
+                    .then(res => {
+                        console.log(res);
+                        if (res.length == 0) {
+                            return;
                         }
+                        res.forEach(id => {
+                            var camera = this.$refs.resources.getLoadedResourceById(
+                                id
+                            );
+                            if (camera) {
+                                HikSDK.getStreamURL(
+                                    camera.cameraIndexCode
+                                ).then(url => {
+                                    this.$refs.playerWall.alarm(
+                                        camera,
+                                        url || this.demo1
+                                    );
+                                });
+                            }
+                        });
                     })
-                });
-            },5000)
+                    .catch(e => {
+                        $tip("数据库连接失败：" + e, "error");
+                    });
+            }, 5000);
         },
         test() {
+            HikSDK.loadAllReources().catch(e=>{
+                $tip("请求流媒体平台失败：" + e, "error");
+            });
             return;
             this.$refs.playerWall.alarm(
                 {
@@ -166,8 +180,8 @@ export default {
             req.end();
         }
     },
-    mounted(){
-        this.init()
+    mounted() {
+        this.init();
     }
 };
 </script>

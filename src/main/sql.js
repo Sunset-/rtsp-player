@@ -16,7 +16,6 @@ module.exports = {
         })
         .then((result) => {
           resolve(result);
-          console.dir(result);
           sql.close();
         })
         .catch((err) => {
