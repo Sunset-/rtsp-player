@@ -1,7 +1,7 @@
 <template>
     <div class="player-wall">
         <div :class="['player-wall-wrap',currentPlayer==item?'active':'']" v-for="(item,index) in players" :key="index" @mousedown="selectPlayer(item)">
-            <rtmp-player :src='item.src' @close="stop(item)"></rtmp-player>
+            <rtmp-player ref="player" :resource="item.resource" :src='item.src' @close="stop(item)"></rtmp-player>
         </div>
     </div>
 </template>
@@ -11,18 +11,22 @@ export default {
         return {
             players: [
                 {
+                    title : "",
                     src: "",
                     resource : null
                 },
                 {
+                    title : "",
                     src: "",
                     resource : null
                 },
                 {
+                    title : "",
                     src: "",
                     resource : null
                 },
                 {
+                    title : "",
                     src: "",
                     resource : null
                 }
@@ -51,6 +55,25 @@ export default {
         },
         selectPlayer(item) {
             this.currentPlayer = item;
+        },
+        alarm(resource,src){
+            //playing
+            for(var i=0;i<this.players.length;i++){
+                if(this.players[i].resource&&this.players[i].resource.id==resource.id){
+                    this.$refs.player[i].alarm();
+                    return;
+                }
+            }
+            //open new
+            this.play(resource,src);
+            this.$nextTick(()=>{
+                for(var i=0;i<this.players.length;i++){
+                    if(this.players[i].resource&&this.players[i].resource.id==resource.id){
+                        this.$refs.player[i].alarm();
+                        return;
+                    }
+                }
+            });
         }
     },
     mounted() {

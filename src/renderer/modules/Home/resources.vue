@@ -4,7 +4,7 @@
     </div>
 </template>
 <script>
-import HikSDK from "./hiksdk.js";
+const HikSDK = require("electron").remote.app.$hiksdk;
 import Store from "./store.js";
 
 export default {
@@ -12,7 +12,10 @@ export default {
         options: {}
     },
     data() {
-        return {};
+        return {
+            loadedResources: [],
+            loadedResourceMap: {}
+        };
     },
     computed: {
         treeOptions() {
@@ -104,7 +107,7 @@ export default {
                                             ] = true;
                                         }
                                     });
-                                return res.filter(item => {
+                                this.loadedResources = res.filter(item => {
                                     if (item.cameraIndexCode) {
                                         return (
                                             !safeOptions.auth ||
@@ -114,6 +117,14 @@ export default {
                                         return haveResourceRegion[item.id];
                                     }
                                 });
+                                this.loadedResourceMap = this.loadedResources.reduce(
+                                    (res, item) => {
+                                        res[item.id] = item;
+                                        return res;
+                                    },
+                                    {}
+                                );
+                                return this.loadedResources;
                             });
                         });
                         return [
@@ -156,6 +167,12 @@ export default {
         },
         onInited(rootNode) {
             this.$emit("inited", rootNode);
+        },
+        getLoadedResources() {
+            return this.loadedResources;
+        },
+        getLoadedResourceById(id) {
+            return this.loadedResourceMap[id];
         }
     },
     mounted() {}

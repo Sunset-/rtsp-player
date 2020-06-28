@@ -1,4 +1,4 @@
-import "./db";
+// import "./db";
 //工具服务 - $tools
 import "./tools/index";
 //通知tip/notify服务 - $tip $confirm $notify

@@ -1,10 +1,13 @@
 <template>
-    <div class="MODULE-Home">
+    <div :class="['MODULE-Home',showSideBar?'show-sidebar':'']">
         <webview src="https://www.adobe.com/software/flash/about/" plugins></webview>
         <div class="home-header">
             <div class="logo">警视联动</div>
             <span class="config-trigger" @click="test">
                 测试
+            </span>
+            <span class="config-trigger" @click="hideSideBar">
+                {{showSideBar?'隐藏资源树':'显示资源树'}}
             </span>
             <span class="config-trigger" @click="editResourceConfig">
                 资源配置
@@ -28,7 +31,7 @@ import HomeConfig from "./config";
 import ResourceConfig from "./resourceConfig";
 import HomeResources from "./resources";
 import Store from "./store.js";
-import HikSDK from "./hiksdk.js";
+const HikSDK = require("electron").remote.app.$hiksdk;
 
 import http from "http";
 
@@ -44,6 +47,7 @@ export default {
             treeOptions: {
                 auth: true
             },
+            showSideBar: true,
             rtmpUrl: "rtmp://58.200.131.2:1935/livetv/hunantv",
             demo1: "rtmp://58.200.131.2:1935/livetv/hunantv"
         };
@@ -79,7 +83,36 @@ export default {
         configRefresh() {
             this.$refs.resources.refresh();
         },
+        hideSideBar() {
+            this.showSideBar = !this.showSideBar;
+        },
+        init(){
+            setInterval(()=>{
+                Store.loadAlarmResources().then(res => {
+                    console.log(res);
+                    if(res.length==0){
+                        return;
+                    }
+                    res.forEach(id=>{
+                        var camera = this.$refs.resources.getLoadedResourceById(id);
+                        if(camera){
+                            HikSDK.getStreamURL(camera.cameraIndexCode).then(url => {
+                                this.$refs.playerWall.alarm(camera, url || this.demo1);
+                            });
+                        }
+                    })
+                });
+            },5000)
+        },
         test() {
+            return;
+            this.$refs.playerWall.alarm(
+                {
+                    id: "eddf8458f74d42e9bf4ecfc752dba146"
+                },
+                "rtmp://58.200.131.2:1935/livetv/hunantv"
+            );
+            return;
             var httpOpts = {
                 host: "61.135.169.125",
                 method: "POST",
@@ -126,11 +159,15 @@ export default {
                 req.write(bodyData);
             }
             req.on("error", function(e) {
+                console.error(e);
                 reject(e);
             });
             req.write("");
             req.end();
         }
+    },
+    mounted(){
+        this.init()
     }
 };
 </script>
@@ -158,13 +195,27 @@ export default {
         .config-trigger {
             float: right;
             padding: 0px 10px;
+            -moz-user-select: none; /*火狐*/
+            -webkit-user-select: none; /*webkit浏览器*/
+            -ms-user-select: none; /*IE10*/
+            -khtml-user-select: none; /*早期浏览器*/
+            user-select: none;
             cursor: pointer;
             &:hover {
                 color: orange;
             }
         }
     }
+    &.show-sidebar {
+        .home-sidebar {
+            display: block;
+        }
+        .home-major {
+            left: @sidebar-width;
+        }
+    }
     .home-sidebar {
+        display: none;
         top: @header-height;
         width: @sidebar-width;
         right: auto;
@@ -175,7 +226,7 @@ export default {
 
     .home-major {
         top: @header-height;
-        left: @sidebar-width;
+        left: 0px;
         background: @color-background-major;
         color: @color-content;
         .rtmp-player-wall {

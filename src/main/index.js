@@ -1,5 +1,4 @@
 import { app, BrowserWindow } from "electron";
-import './store.js';
 const { resolve } = require("path");
 var path = require("path");
 
@@ -44,7 +43,7 @@ function createWindow() {
 		webPreferences: {
 			plugins: true,
 			webSecurity: false,
-			nodeIntegrationInWorker : true,
+			// nodeIntegrationInWorker : true,
 			enablemotemodule:true,
 			nodeIntegration: true, //在网页中集成Node
 		},
@@ -70,6 +69,13 @@ app.on("activate", () => {
 		createWindow();
 	}
 });
+
+
+//挂在对象
+app.$db = require('./db');
+app.$sql = require('./sql');
+app.$hiksdk = require('./hiksdk');
+
 
 /**
  * Auto Updater

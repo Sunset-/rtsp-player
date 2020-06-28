@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const https = require("https");
+const $db = require("./db");
 
 const ERR_CODE = {
   "0x02401000": "APPKey为空", // 	请求中填写正确的APP Key
@@ -67,71 +68,100 @@ function signature(httpOpts) {
 }
 
 function $http(options) {
-  var httpOpts = {
-    hostname: options.host,
-    port: options.port || 443, //443
-    path: options.url,
-    method: (options.type || "POST").toUpperCase(),
-    rejectUnauthorized: false,
-  };
-  var bodyData = JSON.stringify(options.data);
-  //degist body
-  var contentMd5 = crypto
-    .createHash("md5")
-    .update(bodyData || "")
-    .digest("base64");
-  //headers
-  httpOpts.headers = {
-    "User-Agent": "PostmanRuntime/7.25.0",
-    Accept: "*/*",
-    "Content-MD5": contentMd5,
-    "Content-Type": "application/json",
-    Date: Date.now(),
-  };
-  //sign
-  signature(httpOpts);
+  return $db
+    .find("CONFIG", { _id: "$config_id" })
+    .then((res) => {
+      return (configCache = res[0] || {});
+    })
+    .then((config) => {
+      var mediaPlatformAddress = config.mediaPlatformAddress || "";
+      console.log(mediaPlatformAddress, options.url);
+      var ip_port = mediaPlatformAddress.split(":");
+      var httpOpts = {
+        hostname: ip_port[0],
+        port: ip_port[1] || 443, //443
+        path: options.url,
+        method: (options.type || "POST").toUpperCase(),
+        rejectUnauthorized: false,
+      };
+      var bodyData = JSON.stringify(options.data);
+      //degist body
+      var contentMd5 = crypto
+        .createHash("md5")
+        .update(bodyData || "")
+        .digest("base64");
+      //headers
+      httpOpts.headers = {
+        "User-Agent": "PostmanRuntime/7.25.0",
+        Accept: "*/*",
+        "Content-MD5": contentMd5,
+        "Content-Type": "application/json",
+        Date: Date.now(),
+      };
+      //sign
+      signature(httpOpts);
 
-  return new Promise((resolve, reject) => {
-    var req = https.request(httpOpts, function(res) {
-      res.setEncoding("utf-8");
-      var buff = "";
-      res.on("data", function(chunk) {
-        buff += chunk;
-      });
-      res.on("end", function(chunk) {
-        console.log("end:" + buff);
-        try {
-          var data = JSON.parse(buff);
-          if (data && data.code == "0") {
-            resolve(data.data);
-          } else if (data) {
-            $tip(`${data.code}:${ERR_CODE[data.code] || "未知错误"}`);
-            reject(`${data.code}:${ERR_CODE[data.code] || "未知错误"}`);
-          } else {
-            $tip(`未知错误`);
-            reject("未知错误");
-          }
-        } catch (e) {
-          resolve(buff);
+      return new Promise((resolve, reject) => {
+        var req = https.request(httpOpts, function(res) {
+          res.setEncoding("utf-8");
+          var buff = "";
+          res.on("data", function(chunk) {
+            buff += chunk;
+          });
+          res.on("end", function(chunk) {
+            console.log("end:" + buff);
+            try {
+              var data = JSON.parse(buff);
+              if (data && data.code == "0") {
+                resolve(data.data);
+              } else if (data) {
+                $tip(`${data.code}:${ERR_CODE[data.code] || "未知错误"}`);
+                reject(`${data.code}:${ERR_CODE[data.code] || "未知错误"}`);
+              } else {
+                $tip(`未知错误`);
+                reject("未知错误");
+              }
+            } catch (e) {
+              resolve(buff);
+            }
+          });
+        });
+        req.setTimeout(5 * 1000);
+        if (bodyData) {
+          req.write(bodyData);
         }
+        req.on("error", function(e) {
+          reject(e);
+        });
+        req.write("");
+        req.end();
       });
     });
-    req.setTimeout(5 * 1000);
-    if (bodyData) {
-      req.write(bodyData);
-    }
-    req.on("error", function(e) {
-      reject(e);
-    });
-    req.write("");
-    req.end();
-    console.log(3);
-  });
 }
 
 var http = require("http");
 
-export default {
+module.exports = {
+  loadAllReources() {
+    return Promise.all([this.loadAllRegions(), this.loadAllCameras()]).then(
+      (res) => {
+        var regionNodes = res[0].map((item) => {
+          item.id = item.indexCode;
+          item.parentId = item.parentIndexCode;
+          item.isParent = true;
+          return item;
+        });
+        var resourceNodes = res[1].map((item) => {
+          item.id = item.cameraIndexCode;
+          item.parentId = item.regionIndexCode;
+          item.isParent = false;
+          item.name = item.cameraName;
+          return item;
+        });
+        return regionNodes.concat(resourceNodes);
+      }
+    );
+  },
   loadAllRegions() {
     return $http({
       host: "www.baidu.com",
@@ -141,17 +171,28 @@ export default {
         pageSize: 1000,
       },
     }).then((res) => {
-      return (res && res.list) || [  {
-		"indexCode": "root000000",
-		"name": "根节点",
-		"parentIndexCode": "null",
-		"treeCode": "0"
-	},  {
-		"indexCode": "root000001",
-		"name": "仓库",
-		"parentIndexCode": "root000000",
-		"treeCode": "1"
-	}];
+      return (
+        (res && res.list) || [
+          {
+            indexCode: "root000000",
+            name: "根节点",
+            parentIndexCode: "null",
+            treeCode: "0",
+          },
+          {
+            indexCode: "root000001",
+            name: "仓库",
+            parentIndexCode: "root000000",
+            treeCode: "1",
+          },
+          {
+            indexCode: "root000002",
+            name: "楼道",
+            parentIndexCode: "root000000",
+            treeCode: "1",
+          },
+        ]
+      );
     });
   },
   loadAllCameras() {
@@ -163,45 +204,101 @@ export default {
         pageSize: 1000,
       },
     }).then((res) => {
-      return (res && res.list) || [ {
-		"altitude": null, 
-		"cameraIndexCode": "eddf8458f74d42e9bf4ecfc752dba146", 
-		"cameraName": "3层吉米后厨入口", 
-		"cameraType": 0, 
-		"cameraTypeName": "枪机", 
-		"capabilitySet": "io,event_io,event_ias,event_rule,event_heat,record,net,event_face,vss,ptz,status,maintenance,event_device", 
-		"capabilitySetName": null, 
-		"intelligentSet": null, 
-		"intelligentSetName": null, 
-		"channelNo": "33", 
-		"channelType": "digital", 
-		"channelTypeName": "数字通道", 
-		"createTime": "2018-09-15T11:14:27.812+08:00", 
-		"encodeDevIndexCode": "1d3d5c26e6174cf1aa452f57cac91879", 
-		"encodeDevResourceType": null, 
-		"encodeDevResourceTypeName": null, 
-		"gbIndexCode": null, 
-		"installLocation": null, 
-		"keyBoardCode": null, 
-		"latitude": null, 
-		"longitude": null, 
-		"pixel": null, 
-		"ptz": null, 
-		"ptzName": null, 
-		"ptzController": null, 
-		"ptzControllerName": null, 
-		"recordLocation": null, 
-		"recordLocationName": null, 
-		"regionIndexCode": "root000001", 
-		"status": null, 
-		"statusName": null, 
-		"transType": 1, 
-		"transTypeName": "TCP", 
-		"treatyType": null, 
-		"treatyTypeName": null, 
-		"viewshed": null, 
-		"updateTime": "2018-09-15T11:19:48.973+08:00"
-	}];
+      return (
+        (res && res.list) || [
+          {
+            altitude: null,
+            cameraIndexCode: "eddf8458f74d42e9bf4ecfc752dba146",
+            cameraName: "3层吉米后厨入口",
+            cameraType: 0,
+            cameraTypeName: "枪机",
+            capabilitySet:
+              "io,event_io,event_ias,event_rule,event_heat,record,net,event_face,vss,ptz,status,maintenance,event_device",
+            capabilitySetName: null,
+            intelligentSet: null,
+            intelligentSetName: null,
+            channelNo: "33",
+            channelType: "digital",
+            channelTypeName: "数字通道",
+            createTime: "2018-09-15T11:14:27.812+08:00",
+            encodeDevIndexCode: "1d3d5c26e6174cf1aa452f57cac91879",
+            encodeDevResourceType: null,
+            encodeDevResourceTypeName: null,
+            gbIndexCode: null,
+            installLocation: null,
+            keyBoardCode: null,
+            latitude: null,
+            longitude: null,
+            pixel: null,
+            ptz: null,
+            ptzName: null,
+            ptzController: null,
+            ptzControllerName: null,
+            recordLocation: null,
+            recordLocationName: null,
+            regionIndexCode: "root000001",
+            status: null,
+            statusName: null,
+            transType: 1,
+            transTypeName: "TCP",
+            treatyType: null,
+            treatyTypeName: null,
+            viewshed: null,
+            updateTime: "2018-09-15T11:19:48.973+08:00",
+          },
+          {
+            altitude: null,
+            cameraIndexCode: "e123123213",
+            cameraName: "楼道枪机",
+            cameraType: 0,
+            cameraTypeName: "枪机",
+            capabilitySet:
+              "io,event_io,event_ias,event_rule,event_heat,record,net,event_face,vss,ptz,status,maintenance,event_device",
+            capabilitySetName: null,
+            intelligentSet: null,
+            intelligentSetName: null,
+            channelNo: "33",
+            channelType: "digital",
+            channelTypeName: "数字通道",
+            createTime: "2018-09-15T11:14:27.812+08:00",
+            encodeDevIndexCode: "1d3d5c26e6174cf1aa452f57cac91879",
+            encodeDevResourceType: null,
+            encodeDevResourceTypeName: null,
+            gbIndexCode: null,
+            installLocation: null,
+            keyBoardCode: null,
+            latitude: null,
+            longitude: null,
+            pixel: null,
+            ptz: null,
+            ptzName: null,
+            ptzController: null,
+            ptzControllerName: null,
+            recordLocation: null,
+            recordLocationName: null,
+            regionIndexCode: "root000002",
+            status: null,
+            statusName: null,
+            transType: 1,
+            transTypeName: "TCP",
+            treatyType: null,
+            treatyTypeName: null,
+            viewshed: null,
+            updateTime: "2018-09-15T11:19:48.973+08:00",
+          },
+        ]
+      );
+    });
+  },
+  getStreamURL(cameraIndexCode) {
+    return $http({
+      url: "/api/video/v1/cameras/previewURLs",
+      data: {
+        cameraIndexCode: cameraIndexCode,
+        protocol: "rtmp",
+      },
+    }).then((res) => {
+      return res.url;
     });
   },
 };

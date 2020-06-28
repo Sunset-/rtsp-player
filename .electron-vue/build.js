@@ -30,10 +30,13 @@ function clean () {
 }
 
 function build () {
+  console.log("=============================      1")
   greeting()
 
+  console.log("=============================      2")
   del.sync(['dist/electron/*', '!.gitkeep'])
 
+  console.log("=============================      3")
   const tasks = ['main', 'renderer']
   const m = new Multispinner(tasks, {
     preText: 'building',
@@ -43,6 +46,7 @@ function build () {
   let results = ''
 
   m.on('success', () => {
+    console.log("=============================      4")
     process.stdout.write('\x1B[2J\x1B[0f')
     console.log(`\n\n${results}`)
     console.log(`${okayLog}take it away ${chalk.yellow('`electron-builder`')}\n`)
@@ -50,6 +54,7 @@ function build () {
   })
 
   pack(mainConfig).then(result => {
+    console.log("=============================      5")
     results += result + '\n\n'
     m.success('main')
   }).catch(err => {
@@ -60,6 +65,7 @@ function build () {
   })
 
   pack(rendererConfig).then(result => {
+    console.log("=============================      6")
     results += result + '\n\n'
     m.success('renderer')
   }).catch(err => {

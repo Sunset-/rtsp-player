@@ -47,13 +47,48 @@ export default {
                     },
                     {
                         group: "报警平台对接",
-                        label: "报警库DSN",
-                        name: "alarmDbDsn",
+                        label: "报警库IP",
+                        name: "alarmDbIp",
                         widget: "input",
-                        monopolize: true,
-                        style: "width:620px;",
-                        placeholder:
-                            "例如：sqlserver://sa:pwd123456@172.16.100.100:1433/instance?database=mydb",
+                        placeholder: "请输入报警库IP",
+                        validate: {
+                            required: true,
+                            ip: true
+                        }
+                    },
+                    {
+                        label: "报警库端口",
+                        name: "alarmDbPort",
+                        widget: "input",
+                        placeholder: "请输入报警库端口",
+                        validate: {
+                            required: true,
+                            port: true
+                        }
+                    },
+                    {
+                        label: "库名称",
+                        name: "alarmDbName",
+                        widget: "input",
+                        placeholder: "请输入库名称",
+                        validate: {
+                            required: true
+                        }
+                    },
+                    {
+                        label: "用户名",
+                        name: "alarmDbUser",
+                        widget: "input",
+                        placeholder: "请输入用户名",
+                        validate: {
+                            required: true
+                        }
+                    },
+                    {
+                        label: "密码",
+                        name: "alarmDbPassword",
+                        widget: "input",
+                        placeholder: "请输入密码",
                         validate: {
                             required: true
                         }
