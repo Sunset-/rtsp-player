@@ -121,6 +121,7 @@ export default {
     left: 250px;
     bottom: 0px;
     right: 0px;
+    overflow-y:auto;
 }
 
 .rel-item {

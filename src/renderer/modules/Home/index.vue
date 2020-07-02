@@ -17,7 +17,7 @@
             </span>
         </div>
         <div class="BOX home-sidebar">
-            <home-resources ref="resources" :options="treeOptions" @selected="onSelected"></home-resources>
+            <home-resources ref="resources" :options="treeOptions" @selected="play"></home-resources>
         </div>
         <div class="BOX home-major">
             <player-wall ref="playerWall" class="rtmp-player-wall" @stop="onStop"></player-wall>
@@ -49,26 +49,29 @@ export default {
             },
             showSideBar: true,
             rtmpUrl: "rtmp://58.200.131.2:1935/livetv/hunantv",
-            demo1: "rtmp://58.200.131.2:1935/livetv/hunantv"
+            demo1: "https://gbs.liveqing.com:10010/sms/34020000002020000001/hls/34020000001110000064_37020100001320000003/34020000001110000064_37020100001320000003_live.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1OTM2NTk3NTUsInB3IjoiZ3Vlc3QiLCJ0bSI6MTU5MzY1OTQ1NSwidW4iOiJndWVzdCJ9.bcrX0tbBJe_bHyme-VAZDRb64jLLTkTiz3yXYJXfvKg"//"rtmp://58.200.131.2:1935/livetv/hunantv"
         };
     },
     methods: {
-        play(url) {
-            var rtmp = url || this.rtmpUrl;
-            if (!rtmp) {
-                return;
-            }
-            this.$refs.playerWall.play({
-                src: rtmp
-            });
-        },
+        // play(url) {
+        //     var rtmp = url || this.rtmpUrl;
+        //     if (!rtmp) {
+        //         return;
+        //     }
+        //     this.$refs.playerWall.play({
+        //         src: rtmp
+        //     });
+        // },
         remove(v) {
             this.videos = this.videos.filter(cv => cv.id != v.id);
         },
-        onSelected(camera) {
-            HikSDK.getStreamURL(camera.cameraIndexCode).then(url => {
-                console.log("stream-url:", url);
-                this.$refs.playerWall.play(camera, url || this.demo1);
+        play(camera,cb) {
+            Store.getConfig().then(config=>{
+                HikSDK.getStreamURL(camera.cameraIndexCode,config.streamType).then(url => {
+                    console.log("stream-url:", url);
+                    this.$refs.playerWall.play(camera, url || this.demo1);
+                    cb&&cb();
+                });
             });
         },
         onStop(camera) {
@@ -99,14 +102,16 @@ export default {
                                 id
                             );
                             if (camera) {
-                                HikSDK.getStreamURL(
-                                    camera.cameraIndexCode
-                                ).then(url => {
+                                this.play(camera,()=>{
+                                    this.$refs.resources.selectNode(
+                                        camera.id,
+                                        true
+                                    );
                                     this.$refs.playerWall.alarm(
                                         camera,
                                         url || this.demo1
                                     );
-                                });
+                                })
                             }
                         });
                     })
@@ -116,7 +121,7 @@ export default {
             }, 5000);
         },
         test() {
-            HikSDK.loadAllReources().catch(e=>{
+            HikSDK.loadAllReources().catch(e => {
                 $tip("请求流媒体平台失败：" + e, "error");
             });
             return;
@@ -193,11 +198,10 @@ export default {
     @header-height: 45px;
     .home-header {
         width: 100%;
-        background: #e7eaed;
-        border-bottom: 1px solid #e7eaed;
-        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.05);
-        border-collapse: separate !important;
-        padding: 0px 10px;
+        background: #1f2129;
+        border-bottom: 1px solid #444;
+        box-shadow: 0px 6px 7px 4px rgba(0, 21, 41, 0.12);
+        height: @header-height;
         line-height: @header-height;
         box-sizing: border-box;
         .logo {
@@ -215,6 +219,7 @@ export default {
             -khtml-user-select: none; /*早期浏览器*/
             user-select: none;
             cursor: pointer;
+            color:#FFF;
             &:hover {
                 color: orange;
             }
@@ -233,7 +238,7 @@ export default {
         top: @header-height;
         width: @sidebar-width;
         right: auto;
-        background: @color-background-side;
+        background: #1f2129;
         box-sizing: border-box;
         border-right: 1px solid @color-border;
     }

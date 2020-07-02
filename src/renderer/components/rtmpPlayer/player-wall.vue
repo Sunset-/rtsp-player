@@ -91,9 +91,9 @@ export default {
         box-sizing: border-box;
         display: inline-block;
         vertical-align: top;
-        border: 1px solid rgb(255, 255, 255);
+        border: 1px solid #444;
         &.active {
-            border-color: rgb(18, 123, 254);
+            border-color: orange;
         }
     }
 }

@@ -39,7 +39,7 @@ function createWindow() {
 		width: 1000,
 		// transparent: true, 
 		// frame: false,
-		autoHideMenuBar: true,
+		autoHideMenuBar: false,
 		webPreferences: {
 			plugins: true,
 			webSecurity: false,

@@ -46,13 +46,23 @@ export default {
                         }
                     },
                     {
+                        label: "拉流方式",
+                        name: "streamType",
+                        widget: "input",
+                        default : "rtmp",
+                        placeholder: "请输入拉流方式",
+                        validate: {
+                            required: true
+                        }
+                    },
+                    {
                         group: "报警平台对接",
                         label: "报警库IP",
                         name: "alarmDbIp",
                         widget: "input",
                         placeholder: "请输入报警库IP",
                         validate: {
-                            required: true,
+                            required: false,
                             ip: true
                         }
                     },
@@ -62,7 +72,7 @@ export default {
                         widget: "input",
                         placeholder: "请输入报警库端口",
                         validate: {
-                            required: true,
+                            required: false,
                             port: true
                         }
                     },
@@ -72,7 +82,7 @@ export default {
                         widget: "input",
                         placeholder: "请输入库名称",
                         validate: {
-                            required: true
+                            required: false
                         }
                     },
                     {
@@ -81,7 +91,7 @@ export default {
                         widget: "input",
                         placeholder: "请输入用户名",
                         validate: {
-                            required: true
+                            required: false
                         }
                     },
                     {
@@ -90,7 +100,7 @@ export default {
                         widget: "input",
                         placeholder: "请输入密码",
                         validate: {
-                            required: true
+                            required: false
                         }
                     }
                 ]

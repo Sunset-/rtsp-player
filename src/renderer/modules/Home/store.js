@@ -23,6 +23,10 @@ export default {
   loadAlarmStats() {
     return new Promise((resolve, reject) => {
       this.getConfig().then((config) => {
+        if(!config.alarmDbIp){
+          resolve([]);
+          return;
+        }
         $sql
           .query(config)
           .then((res) => {

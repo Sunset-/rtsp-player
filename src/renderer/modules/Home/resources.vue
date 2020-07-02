@@ -21,7 +21,7 @@ export default {
         treeOptions() {
             var safeOptions = this.options || {};
             return {
-                rootId: "null",
+                rootId: "-1",
                 key: {
                     id: "id",
                     parentId: "parentId",
@@ -124,6 +124,7 @@ export default {
                                         },
                                         {}
                                     );
+                                    console.log(this.loadedResources)
                                     return this.loadedResources;
                                 });
                             })
@@ -160,6 +161,9 @@ export default {
         checkNodes(...args) {
             this.$refs.tree &&
                 this.$refs.tree.checkNodes.apply(this.$refs.tree, args);
+        },
+        selectNode(id, flag) {
+            this.$refs.tree && this.$refs.tree.selectNode(id, flag);
         },
         onInited(rootNode) {
             this.$emit("inited", rootNode);
