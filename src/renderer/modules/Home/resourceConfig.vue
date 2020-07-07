@@ -1,6 +1,7 @@
 <template>
     <xui-modal ref="modal" title="资源权限及报警映射" :maskClose="false" width="800">
         <div style="width:800px;height:400px;background:#FFF;position:relative;">
+            <login-shim ref="shim"></login-shim>
             <div class="alarm-resource-panel">
                 <home-resources ref="resources" @inited="treeInited" :options="treeOptions" @checked-resource="onChecked"></home-resources>
             </div>
@@ -19,9 +20,11 @@
 <script>
 import HomeResources from "./resources";
 import Store from "./store.js";
+import LoginShim from "./loginshim.vue";
 
 export default {
     components: {
+        LoginShim,
         HomeResources
     },
     data() {
@@ -55,6 +58,7 @@ export default {
     },
     methods: {
         open() {
+            this.$refs.shim.show();
             this.$refs.modal.open();
             if (this.isTreeInited) {
                 this.initChecked();

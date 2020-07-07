@@ -3,9 +3,6 @@
         <webview src="https://www.adobe.com/software/flash/about/" plugins></webview>
         <div class="home-header">
             <div class="logo">警视联动</div>
-            <span class="config-trigger" @click="test">
-                测试
-            </span>
             <span class="config-trigger" @click="hideSideBar">
                 {{showSideBar?'隐藏资源树':'显示资源树'}}
             </span>
@@ -67,11 +64,8 @@ export default {
         },
         play(camera,cb) {
             Store.getConfig().then(config=>{
-                HikSDK.getStreamURL(camera.cameraIndexCode,config.streamType).then(url => {
-                    console.log("stream-url:", url);
-                    this.$refs.playerWall.play(camera, url || this.demo1);
-                    cb&&cb();
-                });
+                this.$refs.playerWall.play(camera);
+                cb&&cb();
             });
         },
         onStop(camera) {

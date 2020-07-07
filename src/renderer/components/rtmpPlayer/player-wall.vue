@@ -1,7 +1,7 @@
 <template>
     <div class="player-wall">
         <div :class="['player-wall-wrap',currentPlayer==item?'active':'']" v-for="(item,index) in players" :key="index" @mousedown="selectPlayer(item)">
-            <rtmp-player ref="player" :resource="item.resource" :src='item.src' @close="stop(item)"></rtmp-player>
+            <rtmp-player ref="player" :resource="item.resource" @close="stop(item)"></rtmp-player>
         </div>
     </div>
 </template>
@@ -12,22 +12,18 @@ export default {
             players: [
                 {
                     title : "",
-                    src: "",
                     resource : null
                 },
                 {
                     title : "",
-                    src: "",
                     resource : null
                 },
                 {
                     title : "",
-                    src: "",
                     resource : null
                 },
                 {
                     title : "",
-                    src: "",
                     resource : null
                 }
             ],
@@ -35,28 +31,25 @@ export default {
         };
     },
     methods: {
-        play(resource,src) {
-            console.log("play rtmp:",src)
+        play(resource) {
             var player = null;
-            if (!this.currentPlayer.src) {
+            if (!this.currentPlayer.resource) {
                 player = this.currentPlayer;
-            } else if (!(player = this.players.filter(item => !item.src)[0])) {
+            } else if (!(player = this.players.filter(item => !item.resource)[0])) {
                 player = this.currentPlayer;
             }
             player.resource = resource;
-            player.src = src;
             this.currentPlayer = player;
         },
         stop(item) {
             var resource = item.resource;
-            item.src = null;
             item.resource = null;
             this.$emit("stop",resource)
         },
         selectPlayer(item) {
             this.currentPlayer = item;
         },
-        alarm(resource,src){
+        alarm(resource){
             //playing
             for(var i=0;i<this.players.length;i++){
                 if(this.players[i].resource&&this.players[i].resource.id==resource.id){
@@ -65,7 +58,7 @@ export default {
                 }
             }
             //open new
-            this.play(resource,src);
+            this.play(resource);
             this.$nextTick(()=>{
                 for(var i=0;i<this.players.length;i++){
                     if(this.players[i].resource&&this.players[i].resource.id==resource.id){

@@ -5,52 +5,72 @@
             <img src="/static/img/alarm.gif" />
             <div @click="closeAlarm">关闭告警</div>
         </div>
-        <div v-show="playRtmp" class="close" @click="close">关闭</div>
-        <div v-show="playRtmp&&!playing" class="player-loading">
+        <div v-show="playUrl" class="close" @click="close">关闭</div>
+        <div v-show="playUrl&&!playing" class="player-loading">
             <div class="loader-16"></div>
         </div>
-        <LivePlayer v-if="playRtmp" ref="player" style="width:100%;height:100%;" :videoUrl="playRtmp" fluent autoplay live @play="onPlay"></LivePlayer>
+        <LivePlayer v-if="playUrl" ref="player" style="width:100%;height:100%;" :videoUrl="playUrl" fluent autoplay live @play="onPlay"></LivePlayer>
     </div>
 </template>
 <script>
+const HikSDK = require("electron").remote.app.$hiksdk;
 import LivePlayer from "./liveplayer-component.min.js";
+import Store from "../../modules/Home/store.js";
 
 export default {
     components: {
         LivePlayer
     },
     props: {
-        resource: {},
-        src: {}
+        resource: {}
     },
     watch: {
-        src(v, oldV) {
+        resource(v, oldV) {
             if (v != oldV) {
                 this.reset();
             }
             if (v) {
-                this.playRtmp = v;
-            } else {
-                this.playRtmp = null;
-                this.playing = false;
+                this.play(v);
             }
         }
     },
     data() {
         return {
             title: "",
-            playRtmp: null,
+            playUrl: null,
             playing: false,
             alarming: false,
-            closeAlarmTime: 0
+            closeAlarmTime: 0,
+            keepTimer: null
         };
     },
     methods: {
         init() {
-            this.playRtmp = this.src;
+            this.playUrl = this.src;
+        },
+        play(camera) {
+            Store.getConfig().then(config => {
+                this.realPlay(camera, config.streamType);
+                var interval =
+                    (isNaN(config.streamTimeout)
+                        ? 240
+                        : +config.streamTimeout) * 1000;
+                this.keepTimer = setInterval(() => {
+                    this.realPlay(camera, config.streamType);
+                }, interval);
+            });
+        },
+        realPlay(camera, streamType) {
+            HikSDK.getStreamURL(camera.cameraIndexCode, streamType).then(
+                url => {
+                    console.log("stream-url:", url);
+                    this.playUrl = url;
+                }
+            );
         },
         close() {
             this.$emit("close");
+            this.reset();
         },
         onPlay() {
             this.playing = true;
@@ -62,7 +82,10 @@ export default {
         },
         reset() {
             this.alarming = false;
+            this.playing = false;
             this.closeAlarmTime = 0;
+            this.playUrl = null;
+            clearTimeout(this.keepTimer);
         },
         closeAlarm() {
             this.alarming = false;
