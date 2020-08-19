@@ -1,15 +1,24 @@
 <template>
-    <xui-modal ref="modal" title="资源权限及报警映射" :maskClose="false" width="800">
-        <div style="width:800px;height:400px;background:#FFF;position:relative;">
+    <xui-modal ref="modal" title="资源权限及报警映射" :maskClose="false" width="1000">
+        <div style="width:1000px;height:500px;background:#FFF;position:relative;">
             <login-shim ref="shim"></login-shim>
             <div class="alarm-resource-panel">
                 <home-resources ref="resources" @inited="treeInited" :options="treeOptions" @checked-resource="onChecked"></home-resources>
             </div>
             <div class="alarm-relation-panel">
+                <div class="rel-item">
+                    <span class="rel-label">告警查询sql</span>
+                    <span class="rel-key">
+                        <textarea v-model="querySql" placeholder="请输入查询sql" cols="30" rows="10"></textarea>
+                    </span>
+                </div>
                 <div class="rel-item" v-for="item in resources" :key="item.id">
                     <span class="rel-label">{{item.name}}</span>
                     <span class="rel-key">
                         <xui-input v-model="item.key" placeholder="请输入关联列名"></xui-input>
+                    </span>
+                    <span class="rel-key">
+                        <xui-input v-model="item.calc" placeholder="请输入告警条件"></xui-input>
                     </span>
                 </div>
                 <xui-toolbar class="rel-toolbar" :options="toolbarOptions"></xui-toolbar>
@@ -25,7 +34,7 @@ import LoginShim from "./loginshim.vue";
 export default {
     components: {
         LoginShim,
-        HomeResources
+        HomeResources,
     },
     data() {
         return {
@@ -33,9 +42,10 @@ export default {
             resources: [],
             relKey: {},
             treeOptions: {
-                check: true
+                check: true,
             },
             rawConfig: {},
+            querySql: "",
             toolbarOptions: {
                 tools: [
                     {
@@ -43,17 +53,17 @@ export default {
                         color: "success",
                         operate: () => {
                             this.save();
-                        }
+                        },
                     },
                     {
                         label: "取消",
                         color: "info",
                         operate: () => {
                             this.$refs.modal.close();
-                        }
-                    }
-                ]
-            }
+                        },
+                    },
+                ],
+            },
         };
     },
     methods: {
@@ -69,41 +79,45 @@ export default {
             this.initChecked();
         },
         initChecked() {
-            Store.getConfig().then(config => {
+            Store.getConfig().then((config) => {
                 this.rawConfig = JSON.parse(JSON.stringify(config));
+                this.querySql = this.rawConfig.querySql || "";
                 var authResources = config.authResources || [];
                 this.relKey = authResources.reduce((res, item) => {
-                    res[item.id] = item.key;
+                    res[item.id] = item;
                     return res;
                 }, {});
                 this.$refs.resources.clearChecked();
                 this.$refs.resources.checkNodes(
-                    authResources.map(item => item.id)
+                    authResources.map((item) => item.id)
                 );
             });
         },
         save() {
-            this.rawConfig.authResources = this.resources.map(item => ({
+            this.rawConfig.querySql = this.querySql;
+            this.rawConfig.authResources = this.resources.map((item) => ({
                 id: item.id,
-                key: item.key
+                key: item.key,
+                calc: item.calc,
             }));
-            Store.setConfig(this.rawConfig).then(res => {
+            Store.setConfig(this.rawConfig).then((res) => {
                 $tip("保存成功", "success");
                 this.$emit("refresh");
                 this.$refs.modal.close();
             });
         },
         onChecked(resources) {
-            this.resources = resources.map(item => ({
+            this.resources = resources.map((item) => ({
                 id: item.id,
                 name: item.name,
-                key: this.relKey[item.id] || ""
+                key: (this.relKey[item.id] || {}).key || "",
+                calc: (this.relKey[item.id] || {}).calc || "",
             }));
         },
         cancel() {
             this.$refs.modal.close();
-        }
-    }
+        },
+    },
 };
 </script>
 <style lang="less">
@@ -125,7 +139,7 @@ export default {
     left: 250px;
     bottom: 0px;
     right: 0px;
-    overflow-y:auto;
+    overflow-y: auto;
 }
 
 .rel-item {

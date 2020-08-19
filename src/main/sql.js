@@ -12,7 +12,7 @@ module.exports = {
           password: config.alarmDbPassword,
         })
         .then(() => {
-          return sql.query`select * from tb_inwell`;
+          return sql.query(config.querySql);
         })
         .then((result) => {
           resolve(result);

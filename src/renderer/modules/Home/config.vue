@@ -24,10 +24,7 @@ export default {
                         label: "管理密码",
                         name: "adminPwd",
                         widget: "input",
-                        placeholder: "请输入管理密码",
-                        validate: {
-                            required: true
-                        }
+                        placeholder: "请输入管理密码"
                     },
                     {
                         group: "海康平台对接",
@@ -36,97 +33,64 @@ export default {
                         widget: "input",
                         monopolize: true,
                         style: "width:620px;",
-                        placeholder: "请输入海康平台地址，例172.16.100.100:443",
-                        validate: {
-                            required: true,
-                            ipport: true
-                        }
+                        placeholder: "请输入海康平台地址，例172.16.100.100:443"
                     },
                     {
                         label: "海康认证AK",
                         name: "hikAK",
                         widget: "input",
-                        placeholder: "请输入海康认证AK",
-                        validate: {
-                            required: true
-                        }
+                        placeholder: "请输入海康认证AK"
                     },
                     {
                         label: "海康认证SK",
                         name: "hikSK",
                         widget: "input",
-                        placeholder: "请输入海康认证SK",
-                        validate: {
-                            required: true
-                        }
+                        placeholder: "请输入海康认证SK"
                     },
                     {
                         label: "拉流方式",
                         name: "streamType",
                         widget: "input",
                         default: "rtmp",
-                        placeholder: "请输入拉流方式",
-                        validate: {
-                            required: true
-                        }
+                        placeholder: "请输入拉流方式"
                     },
                     {
                         label: "流有效期",
                         name: "streamTimeout",
                         widget: "input",
                         default: "240",
-                        placeholder: "请输入流有效期（秒）",
-                        validate: {
-                            required: true
-                        }
+                        placeholder: "请输入流有效期（秒）"
                     },
                     {
                         group: "报警平台对接",
                         label: "报警库IP",
                         name: "alarmDbIp",
                         widget: "input",
-                        placeholder: "请输入报警库IP",
-                        validate: {
-                            required: false,
-                            ip: true
-                        }
+                        placeholder: "请输入报警库IP"
                     },
                     {
                         label: "报警库端口",
                         name: "alarmDbPort",
                         widget: "input",
-                        placeholder: "请输入报警库端口",
-                        validate: {
-                            required: false,
-                            port: true
-                        }
+                        placeholder: "请输入报警库端口"
                     },
                     {
                         label: "库名称",
                         name: "alarmDbName",
                         widget: "input",
-                        placeholder: "请输入库名称",
-                        validate: {
-                            required: false
-                        }
+                        placeholder: "请输入库名称"
                     },
                     {
                         label: "用户名",
                         name: "alarmDbUser",
                         widget: "input",
-                        placeholder: "请输入用户名",
-                        validate: {
-                            required: false
-                        }
+                        placeholder: "请输入用户名"
                     },
                     {
                         label: "密码",
                         name: "alarmDbPassword",
                         widget: "input",
-                        placeholder: "请输入密码",
-                        validate: {
-                            required: false
-                        }
+                        placeholder: "请输入密码"
                     }
                 ]
             },
@@ -168,6 +132,9 @@ export default {
             });
         },
         saveConfig(config) {
+            if(!config.adminPwd){
+                config.adminPwd = "admin123";
+            }
             Store.setConfig(config).then(res => {
                 $tip("保存成功", "success");
                 this.$emit("refresh");

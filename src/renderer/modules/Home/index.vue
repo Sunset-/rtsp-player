@@ -36,17 +36,18 @@ export default {
     components: {
         HomeConfig,
         ResourceConfig,
-        HomeResources
+        HomeResources,
     },
     computed: {},
     data() {
         return {
             treeOptions: {
-                auth: true
+                auth: true,
             },
             showSideBar: true,
             rtmpUrl: "rtmp://58.200.131.2:1935/livetv/hunantv",
-            demo1: "https://gbs.liveqing.com:10010/sms/34020000002020000001/hls/34020000001110000064_37020100001320000003/34020000001110000064_37020100001320000003_live.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1OTM2NTk3NTUsInB3IjoiZ3Vlc3QiLCJ0bSI6MTU5MzY1OTQ1NSwidW4iOiJndWVzdCJ9.bcrX0tbBJe_bHyme-VAZDRb64jLLTkTiz3yXYJXfvKg"//"rtmp://58.200.131.2:1935/livetv/hunantv"
+            demo1:
+                "https://gbs.liveqing.com:10010/sms/34020000002020000001/hls/34020000001110000064_37020100001320000003/34020000001110000064_37020100001320000003_live.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1OTM2NTk3NTUsInB3IjoiZ3Vlc3QiLCJ0bSI6MTU5MzY1OTQ1NSwidW4iOiJndWVzdCJ9.bcrX0tbBJe_bHyme-VAZDRb64jLLTkTiz3yXYJXfvKg", //"rtmp://58.200.131.2:1935/livetv/hunantv"
         };
     },
     methods: {
@@ -60,12 +61,12 @@ export default {
         //     });
         // },
         remove(v) {
-            this.videos = this.videos.filter(cv => cv.id != v.id);
+            this.videos = this.videos.filter((cv) => cv.id != v.id);
         },
-        play(camera,cb) {
-            Store.getConfig().then(config=>{
+        play(camera, cb) {
+            Store.getConfig().then((config) => {
                 this.$refs.playerWall.play(camera);
-                cb&&cb();
+                cb && cb();
             });
         },
         onStop(camera) {
@@ -86,42 +87,32 @@ export default {
         init() {
             setInterval(() => {
                 Store.loadAlarmResources()
-                    .then(res => {
-                        console.log(res);
+                    .then((res) => {
                         if (res.length == 0) {
                             return;
                         }
-                        res.forEach(id => {
+                        res.forEach((id) => {
                             var camera = this.$refs.resources.getLoadedResourceById(
                                 id
                             );
                             if (camera) {
-                                this.play(camera,()=>{
-                                    this.$refs.resources.selectNode(
-                                        camera.id,
-                                        true
-                                    );
-                                    this.$refs.playerWall.alarm(
-                                        camera,
-                                        url || this.demo1
-                                    );
-                                })
+                                this.$refs.playerWall.alarm(camera);
                             }
                         });
                     })
-                    .catch(e => {
+                    .catch((e) => {
                         $tip("数据库连接失败：" + e, "error");
                     });
             }, 5000);
         },
         test() {
-            HikSDK.loadAllReources().catch(e => {
+            HikSDK.loadAllReources().catch((e) => {
                 $tip("请求流媒体平台失败：" + e, "error");
             });
             return;
             this.$refs.playerWall.alarm(
                 {
-                    id: "eddf8458f74d42e9bf4ecfc752dba146"
+                    id: "eddf8458f74d42e9bf4ecfc752dba146",
                 },
                 "rtmp://58.200.131.2:1935/livetv/hunantv"
             );
@@ -130,19 +121,19 @@ export default {
                 host: "61.135.169.125",
                 method: "POST",
                 port: 443,
-                path: "/api/test"
+                path: "/api/test",
             };
             var bodyData = "";
             return new Promise((resolve, reject) => {
                 console.log("---------start");
-                var req = http.request(httpOpts, function(res) {
+                var req = http.request(httpOpts, function (res) {
                     console.log("---------sended");
                     res.setEncoding("utf-8");
                     var buff = "";
-                    res.on("data", function(chunk) {
+                    res.on("data", function (chunk) {
                         buff += chunk;
                     });
-                    res.on("end", function(chunk) {
+                    res.on("end", function (chunk) {
                         console.log("end:" + buff);
                         try {
                             var data = JSON.parse(buff);
@@ -150,12 +141,14 @@ export default {
                                 resolve(data.data);
                             } else if (data) {
                                 $tip(
-                                    `${data.code}:${ERR_CODE[data.code] ||
-                                        "未知错误"}`
+                                    `${data.code}:${
+                                        ERR_CODE[data.code] || "未知错误"
+                                    }`
                                 );
                                 reject(
-                                    `${data.code}:${ERR_CODE[data.code] ||
-                                        "未知错误"}`
+                                    `${data.code}:${
+                                        ERR_CODE[data.code] || "未知错误"
+                                    }`
                                 );
                             } else {
                                 $tip(`未知错误`);
@@ -171,17 +164,17 @@ export default {
             if (bodyData) {
                 req.write(bodyData);
             }
-            req.on("error", function(e) {
+            req.on("error", function (e) {
                 console.error(e);
                 reject(e);
             });
             req.write("");
             req.end();
-        }
+        },
     },
     mounted() {
         this.init();
-    }
+    },
 };
 </script>
 <style lang="less">
@@ -213,7 +206,7 @@ export default {
             -khtml-user-select: none; /*早期浏览器*/
             user-select: none;
             cursor: pointer;
-            color:#FFF;
+            color: #fff;
             &:hover {
                 color: orange;
             }

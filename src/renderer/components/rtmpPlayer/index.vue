@@ -5,7 +5,7 @@
             <img src="/static/img/alarm.gif" />
             <div @click="closeAlarm">关闭告警</div>
         </div>
-        <div v-show="playUrl" class="close" @click="close">关闭</div>
+        <div v-show="resource&&resource.name" class="close" @click="close">关闭</div>
         <div v-show="playUrl&&!playing" class="player-loading">
             <div class="loader-16"></div>
         </div>
@@ -19,10 +19,10 @@ import Store from "../../modules/Home/store.js";
 
 export default {
     components: {
-        LivePlayer
+        LivePlayer,
     },
     props: {
-        resource: {}
+        resource: {},
     },
     watch: {
         resource(v, oldV) {
@@ -32,7 +32,7 @@ export default {
             if (v) {
                 this.play(v);
             }
-        }
+        },
     },
     data() {
         return {
@@ -41,7 +41,7 @@ export default {
             playing: false,
             alarming: false,
             closeAlarmTime: 0,
-            keepTimer: null
+            keepTimer: null,
         };
     },
     methods: {
@@ -49,7 +49,7 @@ export default {
             this.playUrl = this.src;
         },
         play(camera) {
-            Store.getConfig().then(config => {
+            Store.getConfig().then((config) => {
                 this.realPlay(camera, config.streamType);
                 var interval =
                     (isNaN(config.streamTimeout)
@@ -62,7 +62,7 @@ export default {
         },
         realPlay(camera, streamType) {
             HikSDK.getStreamURL(camera.cameraIndexCode, streamType).then(
-                url => {
+                (url) => {
                     console.log("stream-url:", url);
                     this.playUrl = url;
                 }
@@ -90,11 +90,11 @@ export default {
         closeAlarm() {
             this.alarming = false;
             this.closeAlarmTime = Date.now();
-        }
+        },
     },
     mounted() {
         this.init();
-    }
+    },
 };
 </script>
 <style lang="less">
@@ -123,7 +123,7 @@ export default {
         font-size: 14px;
         color: #fff;
         background: #232323;
-        z-index: 9999;
+        z-index: 10;
         cursor: pointer;
     }
     .close:hover {
